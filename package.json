@@ -1,0 +1,17 @@
+{
+  "name": "wiki-builder",
+  "version": "0.0.1",
+  "private": true,
+  "description": "powered by saber2pr.github.io",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saber2pr/wiki-builder.git"
+  },
+  "keywords": [
+    "actions",
+    "wiki"
+  ],
+  "author": "saber2pr",
+  "license": "MIT"
+}
