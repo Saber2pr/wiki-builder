@@ -22,6 +22,7 @@ runs:
         
         # create blog, collect md files
         mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} 
+        cp ./README.md ./blog/
         # clean
         find ./blog -type f -not -name "*.md" | xargs -I {} rm -rf {}
         find ./blog -type d -empty | xargs -n 1 rm -rf
