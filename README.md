@@ -15,5 +15,5 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: Saber2pr/wiki-builder@v8
+      - uses: Saber2pr/wiki-builder@v9
 ```
