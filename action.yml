@@ -16,6 +16,9 @@ runs:
 
         # create blog, collect md files
         mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} 
+        # clean
+        find ./blog -type f -not -name "*.md" | xargs -I {} rm -rf {}
+        find ./blog -type d -empty | xargs -n 1 rm -rf
 
         # render menu
         cd blog
@@ -23,7 +26,6 @@ runs:
 
         # download wiki app
         curl "https://raw.githubusercontent.com/Saber2pr/saber2pr.github.io/master/release/index.html" > index.html
-        
       shell: bash
 
     - name: Deploy
