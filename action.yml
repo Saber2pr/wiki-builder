@@ -21,6 +21,7 @@ runs:
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
         # git checkout 
+        git checkout -B gh-pages
 
         # create blog, collect md files
         mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} 
@@ -34,10 +35,10 @@ runs:
 
         # download wiki app
         curl "https://raw.githubusercontent.com/Saber2pr/saber2pr.github.io/master/release/index.html" > index.html
-      shell: bash
 
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ inputs.github_token }}
-        publish_dir: ./
+        # deploy
+        git add .
+        git commit . -m 'chore: deploy wiki'
+        git push -u origin gh-pages
+
+      shell: bash
