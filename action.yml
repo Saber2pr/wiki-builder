@@ -14,10 +14,15 @@ runs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
 
-        # download wiki app
-        curl "https://raw.githubusercontent.com/Saber2pr/saber2pr.github.io/master/release/index.html" > index.html
+        # create blog, collect md files
+        mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} 
 
         # render menu
+        cd blog
+        find . | sed -e "s/[^-][^\/]*\//  /g" -e "s/\.md//" | awk '{print substr($0, 3)}'  > ../wiki
+
+        # download wiki app
+        curl "https://raw.githubusercontent.com/Saber2pr/saber2pr.github.io/master/release/index.html" > index.html
         
       shell: bash
 
