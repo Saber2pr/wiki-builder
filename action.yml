@@ -30,11 +30,6 @@ runs:
 
         # download wiki app
         curl "https://raw.githubusercontent.com/Saber2pr/saber2pr.github.io/master/release/index.html" > index.html
-        
-        # deploy
-        git add .
-        git commit -a -m "feat: deploy wiki" --allow-empty
-        git push origin gh-pages
       shell: bash
 
     - name: Deploy
