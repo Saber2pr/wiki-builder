@@ -15,4 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: Saber2pr/wiki-builder@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
