@@ -10,12 +10,13 @@ runs:
     - uses: actions/checkout@v2
       with:
         fetch-depth: 0
-        ref: gh-pages
         
     - run: |
         # config
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+        # git checkout 
 
         # create blog, collect md files
         mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} 
@@ -36,3 +37,7 @@ runs:
         git push origin gh-pages
       shell: bash
 
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        publish_dir: ./
