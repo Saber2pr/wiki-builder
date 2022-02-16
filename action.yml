@@ -8,7 +8,10 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v2
-
+      with:
+        fetch-depth: 0
+        ref: gh-pages
+        
     - run: |
         # config
         git config user.name "github-actions[bot]"
@@ -26,10 +29,10 @@ runs:
 
         # download wiki app
         curl "https://raw.githubusercontent.com/Saber2pr/saber2pr.github.io/master/release/index.html" > index.html
+        
+        # deploy
+        git add .
+        git commit -a -m "feat: deploy wiki" --allow-empty
+        git push origin gh-pages
       shell: bash
 
-    - name: Deploy
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./
