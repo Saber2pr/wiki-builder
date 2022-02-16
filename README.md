@@ -1,4 +1,5 @@
 # wiki-builder
+
 powered by saber2pr.github.io
 
 ```yml
@@ -14,5 +15,5 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: Saber2pr/wiki-builder@v7
+      - uses: Saber2pr/wiki-builder@v8
 ```
