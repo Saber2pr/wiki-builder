@@ -20,9 +20,6 @@ runs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-        # git checkout 
-        git checkout -B gh-pages
-
         # create blog, collect md files
         mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} 
         # clean
@@ -40,6 +37,6 @@ runs:
         # deploy
         git add .
         git commit . -m 'chore: deploy wiki'
-        git push -u origin gh-pages
+        git push origin -u -f master:gh-pages
 
       shell: bash
