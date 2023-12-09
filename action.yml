@@ -9,36 +9,5 @@ inputs:
     required: false
     description: 'github token'
 runs:
-  using: "composite"
-  steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-        
-    - run: |
-        # config
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        
-        # create blog, collect md files
-        mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} 
-        cp ./README.md ./blog/
-        # clean
-        find ./blog -type f -not -name "*.md" | xargs -I {} rm -rf {}
-        find ./blog -type d -empty | xargs -n 1 rm -rf
-
-        # render menu
-        cd blog
-        find . | sed -e "s/[^-][^\/]*\//  /g" -e "s/\.md//" | awk '{print substr($0, 3)}'  > ../wiki
-        cd ..
-
-        # download wiki app
-        curl "https://raw.githubusercontent.com/Saber2pr/saber2pr.github.io/master/release/index.html" > index.html
-        touch .nojekyll
-
-        # deploy
-        git add .
-        git commit . -m 'chore: deploy wiki'
-        git push origin -u -f master:gh-pages
-
-      shell: bash
+    using: 'node16'
+    main: index.js

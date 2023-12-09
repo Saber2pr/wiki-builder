@@ -13,5 +13,14 @@
     "wiki"
   ],
   "author": "saber2pr",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.4"
+  },
+  "dependencies": {
+    "@saber2pr/ts-compiler": "^0.3.20",
+    "@types/fs-extra": "^11.0.4",
+    "fs-extra": "^11.2.0",
+    "showdown": "^2.1.0"
+  }
 }
