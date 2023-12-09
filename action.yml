@@ -11,6 +11,9 @@ inputs:
   basename:
     required: false
     description: 'router basename'
+  cname:
+    required: false
+    description: 'cname'
 runs:
     using: 'node16'
     main: dist/index.js

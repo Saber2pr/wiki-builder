@@ -9,6 +9,7 @@ const converter = new showdown.Converter()
 
 async function main() {
   const basename = core.getInput('basename') || ''
+  const cname = core.getInput('cname')
 
   // config
   execSync('git config user.name github-actions')
@@ -61,6 +62,10 @@ async function main() {
   }
 
   await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8')))
+
+  if(cname) {
+    await fs.writeFile(path.join(process.cwd(), 'CNAME'), cname)
+  }
 
   // deploy
   execSync('git add .')
