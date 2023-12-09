@@ -3,7 +3,9 @@
   "version": "0.0.8",
   "private": true,
   "description": "powered by saber2pr.github.io",
-  "scripts": {},
+  "scripts": {
+    "package": "ncc build index.js -o dist"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Saber2pr/wiki-builder.git"
@@ -15,6 +17,7 @@
   "author": "saber2pr",
   "license": "MIT",
   "devDependencies": {
+    "@vercel/ncc": "^0.38.1",
     "@types/node": "^20.10.4"
   },
   "dependencies": {
