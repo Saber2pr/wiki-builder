@@ -57,6 +57,11 @@ async function main() {
   }
 
   await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8')))
+
+  // deploy
+  execSync('git add .')
+  execSync(`git commit . -m 'chore: deploy wiki'`)
+  execSync(`git push origin -u -f master:gh-pages`)
 }
 
 main().catch(console.log)
