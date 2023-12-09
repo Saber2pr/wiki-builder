@@ -8,12 +8,17 @@ const converter = new showdown.Converter()
 
 async function main() {
   // config
-  // execSync('git config user.name github-actions')
-  // execSync('git config user.email github-actions@github.com')
+  execSync('git config user.name github-actions')
+  execSync('git config user.email github-actions@github.com')
+
+  // get home md
+  const rootFiles = await fs.readdir(process.cwd())
+  const homeFile = rootFiles.find(item => /\.md$/.test(item))
+  const appName = homeFile.split('.')[0]
 
   // create blog, collect md files
   execSync('mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} ')
-  execSync('cp ./README.md ./blog/')
+  execSync(`cp ./${appName}.md ./blog/`)
   execSync('find ./blog -type f -not -name "*.md" | xargs -I {} rm -rf {}')
   execSync('find ./blog -type d -empty | xargs -n 1 rm -rf')
 
@@ -29,22 +34,29 @@ async function main() {
   // 2. add content
   const template = await fs.readFile('./index.html', 'utf-8')
   const wiki = await fs.readFile('./wiki', 'utf-8')
-  const createHtml = (content) => {
-    return template.replace('<head>', `<head><script>
+  const createHtml = (title, content) => {
+    return template.replace('<head>', `<head>
+    <style>
+    html,body {padding:0;margin:0;}
+    img {max-width:100%;}
+    </style>
+    <script>
     window.__wiki = \`${wiki}\`
     window.__blog = \`${content.replaceAll('`', '\\`')}\`
-    </script>`).replace('<div id="root"></div>', `<div id="root"><p>${
-      converter.makeHtml(content)
-      }</p></div>`)
+    </script>`).replace('<div id="root"></div>', `<div id="root"><div style="width: 100%;height: 40px;background-color: #20232a;"></div><div style="margin: 0 4.5rem;display:flex;">
+      <div style="width:70%;">${converter.makeHtml(content)}</div>
+      <div style="width: 30%;"></div>
+    </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title}</title>`)
   }
 
   const files = await tp.walkFile('./blog', entry => /\.md$/.test(entry.path), {withContent: true})
   for(const file of files){
     const dir = path.dirname(file.path)
-    await fs.writeFile(path.join(dir, `${path.parse(file.path).name}.html`), createHtml(file.content))
+    const title = path.parse(file.path).name
+    await fs.writeFile(path.join(dir, `${title}.html`), createHtml(title, file.content))
   }
 
-  await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(await fs.readFile('./README.md', 'utf-8')))
+  await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8')))
 }
 
 main().catch(console.log)
