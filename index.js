@@ -3,10 +3,13 @@ const tp = require('@saber2pr/ts-compiler')
 const fs = require('fs-extra')
 const path = require('path')
 const showdown  = require('showdown')
+const core = require('@actions/core')
 
 const converter = new showdown.Converter()
 
 async function main() {
+  const basename = core.getInput('basename') || ''
+
   // config
   execSync('git config user.name github-actions')
   execSync('git config user.email github-actions@github.com')
@@ -41,6 +44,7 @@ async function main() {
     img {max-width:100%;}
     </style>
     <script>
+    window.__basename = '${basename}'
     window.__wiki = \`${wiki}\`
     window.__blog = \`${content.replaceAll('`', '\\`')}\`
     </script>`).replace('<div id="root"></div>', `<div id="root"><div style="width: 100%;height: 40px;background-color: #20232a;"></div><div style="margin: 0 4.5rem;display:flex;">

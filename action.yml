@@ -8,6 +8,9 @@ inputs:
   github_token:
     required: false
     description: 'github token'
+  basename:
+    required: false
+    description: 'router basename'
 runs:
     using: 'node16'
     main: dist/index.js
