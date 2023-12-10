@@ -49,9 +49,9 @@ async function main() {
     window.__wiki = \`${wiki}\`
     window.__blog = \`${encodeURIComponent(content)}\`
     </script>`).replace('<div id="root"></div>', `<div id="root"><div style="width: 100%;height: 40px;background-color: #20232a;"></div><div style="margin: 0 4.5rem;display:flex;">
-      <div style="width:70%;font-size: 3rem;margin-top: 3rem;margin-left: 1rem;margin-right: 1rem;">
-        <h1 style="word-break: break-all;">${title}</h1>
-        <div style="margin:1rem;padding:1rem;line-height: 1.5rem;">${converter.makeHtml(content)}</div>
+      <div style="width:70%;">
+        <h1 style="word-break: break-all;font-size: 3rem;margin-top: 3rem;margin-left: 1rem;margin-right: 1rem;">${title}</h1>
+        <div style="margin:1rem;padding:1rem;">${converter.makeHtml(content)}</div>
       </div>
       <div style="width: 30%;"></div>
     </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title}</title>`)
