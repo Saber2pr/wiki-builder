@@ -30,7 +30,7 @@ async function main() {
   execSync(`cd blog && find . | sed -e "s/[^-][^/]*\\//  /g" -e "s/\.md//" | awk '{print substr($0, 3)}'  > ../wiki`)
 
   // download wiki app
-  execSync(`curl "https://raw.githubusercontent.com/Saber2pr/saber2pr.github.io/master/release/index.html" > index.html`)
+  execSync(`curl "https://raw.githubusercontent.com/Saber2pr/wiki/master/release/index.html" > index.html`)
   execSync('touch .nojekyll')
 
   // inject static props
