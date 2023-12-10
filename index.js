@@ -61,7 +61,9 @@ async function main() {
   for(const file of files){
     const dir = path.dirname(file.path)
     const title = path.parse(file.path).name
-    await fs.writeFile(path.join(dir, `${title}.html`), createHtml(title, file.content))
+    const targetDir = path.join(dir, title)
+    await fs.mkdir(targetDir)
+    await fs.writeFile(path.join(targetDir, `index.html`), createHtml(title, file.content))
   }
 
   await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8')))
