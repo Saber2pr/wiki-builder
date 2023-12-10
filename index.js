@@ -38,11 +38,46 @@ async function main() {
   // 2. add content
   const template = await fs.readFile('./index.html', 'utf-8')
   const wiki = await fs.readFile('./wiki', 'utf-8')
+
+  const aniStyle = 'background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.15) 37%, rgba(0, 0, 0, 0.06) 63%);background-size: 400% 100%;'
+  
   const createHtml = (title, content) => {
     return template.replace('<head>', `<head>
     <style>
-    html,body {padding:0;margin:0;}
-    img {max-width:100%;}
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    img {
+      max-width: 100%;
+    }
+
+    @keyframes skeleton-loading {
+      0% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0 50%;
+      }
+    }
+
+    .skeleton-loading-list {
+      margin: 3rem 1rem 10rem;
+    }
+
+    .skeleton-loading-item {
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.15) 37%, rgba(0, 0, 0, 0.06) 63%);
+      background-size: 400% 100%;
+      animation-name: skeleton-loading;
+      animation-duration: 1.4s;
+      animation-timing-function: ease;
+      animation-iteration-count: infinite;
+      height: 16px;
+      margin-top: 16px;
+    }
     </style>
     <script>
     window.__basename = '${basename}'
@@ -53,7 +88,14 @@ async function main() {
         <h1 style="word-break: break-all;font-size: 3rem;margin-top: 3rem;margin-left: 1rem;margin-right: 1rem;">${title}</h1>
         <div style="margin:1rem;padding:1rem;">${converter.makeHtml(content)}</div>
       </div>
-      <div style="width: 30%;"></div>
+      <div style="width: 30%;background-color: #f7f7f7;border-left: 1px solid #ececec;height: calc(100vh - 40px);position: fixed;right:-1rem;;top:40px;">
+        <ul class="skeleton-loading-list" style="list-style: none;padding:0;">
+          <li class="skeleton-loading-item" style="width:38%"></li>
+          <li class="skeleton-loading-item"></li>
+          <li class="skeleton-loading-item"></li>
+          <li class="skeleton-loading-item" style="width:61%"></li>
+        </ul>
+      </div>
     </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title}</title>`)
   }
 
