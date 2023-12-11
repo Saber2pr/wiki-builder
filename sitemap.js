@@ -6,13 +6,11 @@ const createSitemap = (cname = '', basename = '', urls) => `<?xml version="1.0" 
     <loc>https://${cname}/</loc>
     <priority>1.00</priority>
 </url>
-  ${urls.map(url => {
-    `<url>
-    <loc>${'https://' + cname + basename + url}</loc>
-    <lastmod>${moment().format('YYYY-MM-DD')}</lastmod>
-    <changefreq>daily</changefreq>
-</url>`
-})}
+  ${urls.map(url => `<url>
+  <loc>${'https://' + cname + basename + url}</loc>
+  <lastmod>${moment().format('YYYY-MM-DD')}</lastmod>
+  <changefreq>daily</changefreq>
+</url>`).join('\n')}
 </urlset>`
 
 module.exports = {
