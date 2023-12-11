@@ -21,6 +21,7 @@
     "@vercel/ncc": "^0.38.1"
   },
   "dependencies": {
+    "@saber2pr/tree-lang": "^0.0.9",
     "@saber2pr/ts-compiler": "^0.3.20",
     "@types/fs-extra": "^11.0.4",
     "fs-extra": "^11.2.0",

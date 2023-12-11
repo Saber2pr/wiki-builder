@@ -23,6 +23,11 @@
     "@nodelib/fs.scandir" "2.1.5"
     fastq "^1.6.0"
 
+"@saber2pr/tree-lang@^0.0.9":
+  version "0.0.9"
+  resolved "https://registry.npmmirror.com/@saber2pr/tree-lang/-/tree-lang-0.0.9.tgz#33b0b41de33900025e8bee40c462dff4df2537cc"
+  integrity sha512-OjxX9rBukOGiGAxDSIMLto3aeoBUUYHvMVWEB2U+AlcPLmBvxgnBsBsxGZAyzq2ZwHajSJ3po+8nD47dKFJQZg==
+
 "@saber2pr/ts-compiler@^0.3.20":
   version "0.3.20"
   resolved "https://registry.npmmirror.com/@saber2pr/ts-compiler/-/ts-compiler-0.3.20.tgz#40c17ac69c5f295f87e002f7284249043fed3cfb"

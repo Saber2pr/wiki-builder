@@ -5,6 +5,7 @@ const path = require('path')
 const showdown  = require('showdown')
 const core = require('@actions/core')
 const { createSitemap } = require('./sitemap')
+const { renderWikiMenu } = require('./renderWikiMenu')
 
 const converter = new showdown.Converter()
 
@@ -40,9 +41,8 @@ async function main() {
   const template = await fs.readFile('./index.html', 'utf-8')
   const wiki = await fs.readFile('./wiki', 'utf-8')
 
-  const aniStyle = 'background: linear-gradient(90deg, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.15) 37%, rgba(0, 0, 0, 0.06) 63%);background-size: 400% 100%;'
-  
-  const createHtml = (title, content) => {
+  const createHtml = (title, content, fPath) => {
+    const wikiMenu = renderWikiMenu(wiki, fPath)
     return template.replace('<head>', `<head>
     <style>
     html,
@@ -80,22 +80,62 @@ async function main() {
       margin-top: 16px;
     }
     </style>
+
+    <style>
+      .ssr-a {
+        color: #6d6d6d;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      .ssr-a:hover {
+        color: black;
+      }
+
+      .ssr-a-active {
+        color: black;
+        font-weight: 700;
+        border-left: 0.25rem solid #61dafb;
+        padding-left: 10px;
+      }
+
+      .ssr-li {
+        line-height: 2rem;
+      }
+
+      .ssr-ul {
+        list-style: none;
+        padding-left: 16px;
+        margin: 4px;
+      }
+
+      .ssr-dir {
+        color: #6d6d6d;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+
+      .ssr-dir-active {
+        color: #1a1a1a;
+      }
+
+      .ssr-div-name:hover {
+        outline: -webkit-focus-ring-color auto 1px;
+        color: #1a1a1a;
+      }
+    </style>
     <script>
     window.__basename = '${basename}'
     window.__wiki = \`${wiki}\`
     window.__blog = \`${encodeURIComponent(content)}\`
-    </script>`).replace('<div id="root"></div>', `<div id="root"><div style="width: 100%;height: 40px;background-color: #20232a;"></div><div style="margin: 0 4.5rem;display:flex;">
+    </script>`).replace('<div id="root"></div>', `<div id="root"><div style="width: 100%;height: 40px;background-color: #20232a;position: fixed;left:0;top:0;"></div><div style="margin: 0 4.5rem;display:flex;">
       <div style="width:70%;">
         <h1 style="word-break: break-all;font-size: 3rem;margin-top: 3rem;margin-left: 1rem;margin-right: 1rem;">${title}</h1>
         <div style="margin:1rem;padding:1rem;">${converter.makeHtml(content)}</div>
       </div>
-      <div style="width: 30%;background-color: #f7f7f7;border-left: 1px solid #ececec;height: calc(100vh - 40px);position: fixed;right:-1rem;;top:40px;">
-        <ul class="skeleton-loading-list" style="list-style: none;padding:0;">
-          <li class="skeleton-loading-item" style="width:38%"></li>
-          <li class="skeleton-loading-item"></li>
-          <li class="skeleton-loading-item"></li>
-          <li class="skeleton-loading-item" style="width:61%"></li>
-        </ul>
+      <div style="width: 30%;background-color: #f7f7f7;border-left: 1px solid #ececec;height: calc(100vh - 40px);position: fixed;right:-1rem;;top:40px;overflow-y:auto;">
+        <div style="margin: 3rem 0 10rem">${wikiMenu}</div>
       </div>
     </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title}</title>`)
   }
@@ -107,10 +147,13 @@ async function main() {
     const title = path.parse(file.path).name
     const targetDir = path.join(dir, title)
     await fs.mkdir(targetDir)
-    await fs.writeFile(path.join(targetDir, `index.html`), createHtml(title, file.content))
 
     const idx = file.path.indexOf('/blog')
-    urls.push(file.path.slice(idx).replace(/\.md$/, '/'))
+    const fPath = file.path.slice(idx).replace(/\.md$/, '')
+
+    await fs.writeFile(path.join(targetDir, `index.html`), createHtml(title, file.content, fPath))
+
+    urls.push(fPath + '/')
   }
 
   if(cname) {
@@ -118,7 +161,7 @@ async function main() {
     await fs.writeFile(path.join(process.cwd(), 'sitemap.xml'), createSitemap(cname, basename, urls))
   }
 
-  await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8')))
+  await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8'), '/'))
 
   if(cname) {
     await fs.writeFile(path.join(process.cwd(), 'CNAME'), cname)
