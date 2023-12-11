@@ -114,6 +114,7 @@ async function main() {
   }
 
   if(cname) {
+    await fs.writeFile(path.join(process.cwd(), 'robots.txt'), `Sitemap: https://${cname}/sitemap.xml`)
     await fs.writeFile(path.join(process.cwd(), 'sitemap.xml'), createSitemap(cname, basename, urls))
   }
 
