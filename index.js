@@ -4,6 +4,7 @@ const fs = require('fs-extra')
 const path = require('path')
 const showdown  = require('showdown')
 const core = require('@actions/core')
+const { createSitemap } = require('./sitemap')
 
 const converter = new showdown.Converter()
 
@@ -99,6 +100,7 @@ async function main() {
     </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title}</title>`)
   }
 
+  const urls = []
   const files = await tp.walkFile('./blog', entry => /\.md$/.test(entry.path), {withContent: true})
   for(const file of files){
     const dir = path.dirname(file.path)
@@ -106,6 +108,13 @@ async function main() {
     const targetDir = path.join(dir, title)
     await fs.mkdir(targetDir)
     await fs.writeFile(path.join(targetDir, `index.html`), createHtml(title, file.content))
+
+    const idx = file.path.indexOf('/blog')
+    urls.push(file.path.slice(idx))
+  }
+
+  if(cname) {
+    await fs.writeFile(path.join(process.cwd(), 'sitemap.xml'), createSitemap(cname, basename, urls))
   }
 
   await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8')))

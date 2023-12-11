@@ -17,13 +17,14 @@
   "author": "saber2pr",
   "license": "MIT",
   "devDependencies": {
-    "@vercel/ncc": "^0.38.1",
-    "@types/node": "^20.10.4"
+    "@types/node": "^20.10.4",
+    "@vercel/ncc": "^0.38.1"
   },
   "dependencies": {
     "@saber2pr/ts-compiler": "^0.3.20",
     "@types/fs-extra": "^11.0.4",
     "fs-extra": "^11.2.0",
+    "moment": "^2.29.4",
     "showdown": "^2.1.0"
   }
 }
