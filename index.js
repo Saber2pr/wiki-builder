@@ -110,7 +110,7 @@ async function main() {
     await fs.writeFile(path.join(targetDir, `index.html`), createHtml(title, file.content))
 
     const idx = file.path.indexOf('/blog')
-    urls.push(file.path.slice(idx).replace(/\.md$/, ''))
+    urls.push(file.path.slice(idx).replace(/\.md$/, '/'))
   }
 
   if(cname) {
