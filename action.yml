@@ -1,0 +1,19 @@
+name: 'wiki-builder'
+branding:
+  icon: arrow-up-circle
+  color: blue
+description: 'powered by saber2pr.github.io'
+author: 'saber2pr'
+inputs:
+  github_token:
+    required: false
+    description: 'github token'
+  basename:
+    required: false
+    description: 'router basename'
+  cname:
+    required: false
+    description: 'cname'
+runs:
+    using: 'node16'
+    main: dist/index.js
