@@ -12,6 +12,8 @@ const converter = new showdown.Converter()
 async function main() {
   const basename = core.getInput('basename') || ''
   const cname = core.getInput('cname')
+  const gaId = core.getInput('gaId')
+  const iconUrl = core.getInput('iconUrl')
 
   // config
   execSync('git config user.name github-actions')
@@ -43,7 +45,7 @@ async function main() {
 
   const createHtml = (title, content, fPath) => {
     const wikiMenu = renderWikiMenu(wiki, fPath)
-    return template.replace('<head>', `<head>
+    let outHtml = template.replace('<head>', `<head>
     <style>
     html,
     body {
@@ -179,6 +181,25 @@ async function main() {
       </div>
     </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title}</title>`)
     .replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.slice(0, 113)}…">`)
+
+    if(gaId) {
+      outHtml = outHtml.replace('<head>', `<head>
+      <script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+      
+        gtag('config', '${gaId}');
+      </script>`)
+    }
+
+    if(iconUrl) {
+      outHtml = outHtml.replace('<head>', `<head>
+      <link rel="icon" href="${iconUrl}" type="image/x-icon" />`)
+    }
+
+    return outHtml
   }
 
   const urls = []
