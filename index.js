@@ -144,6 +144,7 @@ async function main() {
         padding-right: 0.7rem;
         color: #d5d5d7;
         border-bottom: none;
+        line-height: 40px;
       }
 
       .ssr-content-title {
