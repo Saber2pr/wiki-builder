@@ -124,20 +124,61 @@ async function main() {
         outline: -webkit-focus-ring-color auto 1px;
         color: #1a1a1a;
       }
+
+      .ssr-topheader {
+        width: 100%;
+        height: 40px;
+        background-color: #20232a;
+        position: fixed;
+        left:0;
+        top:0;
+      }
+      .ssr-topheader-a {
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        display: inline-block;
+        padding-left: 0.7rem;
+        padding-right: 0.7rem;
+        color: #d5d5d7;
+        border-bottom: none;
+      }
+
+      .ssr-content-title {
+        word-break: break-all;
+        font-size: 3rem;
+        margin-top: 3rem;
+        margin-left: 1rem;
+        margin-right: 1rem;
+      }
+
+      .ssr-wiki-menu {
+        width: 30%;
+        background-color: #f7f7f7;
+        border-left: 1px solid #ececec;
+        height: calc(100vh - 40px);
+        position: fixed;
+        right:-1rem;
+        top:40px;
+        overflow-y:auto;
+      }
     </style>
     <script>
     window.__basename = '${basename}'
     window.__wiki = \`${wiki}\`
     window.__blog = \`${encodeURIComponent(content)}\`
-    </script>`).replace('<div id="root"></div>', `<div id="root"><div style="width: 100%;height: 40px;background-color: #20232a;position: fixed;left:0;top:0;"></div><div style="margin: 0 4.5rem;display:flex;">
+    </script>`).replace('<div id="root"></div>', `<div id="root"><div class="ssr-topheader">
+    <a class="ssr-topheader-a" href="${basename}/">${appName}</a>
+    </div><div style="margin: 0 4.5rem;display:flex;">
       <div style="width:70%;">
-        <h1 style="word-break: break-all;font-size: 3rem;margin-top: 3rem;margin-left: 1rem;margin-right: 1rem;">${title}</h1>
+        <h1 class="ssr-content-title">${title}</h1>
         <div style="margin:1rem;padding:1rem;">${converter.makeHtml(content)}</div>
       </div>
-      <div style="width: 30%;background-color: #f7f7f7;border-left: 1px solid #ececec;height: calc(100vh - 40px);position: fixed;right:-1rem;;top:40px;overflow-y:auto;">
+      <div class="ssr-wiki-menu">
         <div style="margin: 3rem 0 10rem">${wikiMenu}</div>
       </div>
     </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title}</title>`)
+    .replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.slice(0, 113)}…">`)
   }
 
   const urls = []
