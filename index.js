@@ -28,7 +28,7 @@ async function main() {
 
   // create blog, collect md files
   execSync('mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} ')
-  execSync(`cp ./${appName}.md ./blog/`)
+  await fs.copy(`./${appName}.md`, `./blog/${appName}.md`)
   execSync('find ./blog -type f -not -name "*.md" | xargs -I {} rm -rf {}')
   execSync('find ./blog -type d -empty | xargs -n 1 rm -rf')
 
