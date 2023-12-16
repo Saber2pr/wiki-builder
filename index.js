@@ -208,7 +208,7 @@ async function main() {
       <div class="ssr-wiki-menu">
         <div style="margin: 3rem 0 10rem">${wikiMenu}</div>
       </div>
-    </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title} - ${appName}</title>`)
+    </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title === appName ? title : `${title} - ${appName}`}</title>`)
     .replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.slice(0, 113)}…">`)
 
     if(gaId) {
