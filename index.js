@@ -281,9 +281,9 @@ async function main() {
   }
 
   // deploy
-  // execSync('git add .')
-  // execSync(`git commit . -m 'chore: deploy wiki'`)
-  // execSync(`git push origin -u -f master:gh-pages`)
+  execSync('git add .')
+  execSync(`git commit . -m 'chore: deploy wiki'`)
+  execSync(`git push origin -u -f master:gh-pages`)
 }
 
 main().catch(console.log)
