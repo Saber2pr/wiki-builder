@@ -6,8 +6,11 @@ const showdown  = require('showdown')
 const core = require('@actions/core')
 const { createSitemap } = require('./sitemap')
 const { renderWikiMenu } = require('./renderWikiMenu')
+const md5 = require('md5')
 
 const converter = new showdown.Converter()
+
+const getMdName = mdFileName => mdFileName ? mdFileName.split('.')[0] : ''
 
 async function main() {
   const basename = core.getInput('basename') || ''
@@ -22,7 +25,7 @@ async function main() {
   // get home md
   const rootFiles = await fs.readdir(process.cwd())
   const homeFile = rootFiles.find(item => /\.md$/.test(item))
-  const appName = homeFile.split('.')[0]
+  const appName = getMdName(homeFile)
 
   // create blog, collect md files
   execSync('mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} ')
@@ -43,8 +46,40 @@ async function main() {
   const template = await fs.readFile('./index.html', 'utf-8')
   const wiki = await fs.readFile('./wiki', 'utf-8')
 
-  const createHtml = (title, content, fPath) => {
-    const wikiMenu = renderWikiMenu(wiki, fPath)
+  const getPathMd5Id = (path) => {
+    if(path) {
+      const tag = '/blog'
+      const idx = path.indexOf(tag)
+      const relPath = path.slice(idx + tag.length)
+      return relPath.split('/').filter(i => !!i).map(item => md5(item)).join('/')
+    }
+    return ''
+  }
+
+  // render md5
+  /**
+   * @param {*} wiki 
+   * @param {tp.EntryResult[]} files 
+   * @returns 
+   */
+  const renderWikiMd5 = (wiki, files) => {
+    if(wiki) {
+      return wiki.split('\n').map(line => {
+        const text = line.trim()
+        if(text) {
+          const file = files.find(item => getMdName(item.name) === text)
+          if(file) {
+            return `${line}:${getPathMd5Id(file.path)}`
+          }
+          return `${line}`
+        }
+      }).join('\n')
+    }
+    return wiki
+  }
+
+  const createHtml = (title, content, md5Id) => {
+    const wikiMenu = renderWikiMenu(basename, wiki, md5Id)
     let outHtml = template.replace('<head>', `<head>
     <style>
     html,
@@ -168,7 +203,7 @@ async function main() {
     </style>
     <script>
     window.__basename = '${basename}'
-    window.__wiki = \`${wiki}\`
+    window.__wiki = \`${renderWikiMd5(wiki, files)}\`
     window.__blog = \`${encodeURIComponent(content)}\`
     </script>`).replace('<div id="root"></div>', `<div id="root"><div class="ssr-topheader">
     <a class="ssr-topheader-a" href="${basename}/">${appName}</a>
@@ -205,18 +240,28 @@ async function main() {
 
   const urls = []
   const files = await tp.walkFile('./blog', entry => /\.md$/.test(entry.path), {withContent: true})
+
+  const postRootDir = path.join(process.cwd(), 'posts')
+  try {
+    await fs.mkdir(postRootDir, {'recursive': true})
+  } catch (error) {
+    
+  }
+
   for(const file of files){
     const dir = path.dirname(file.path)
     const title = path.parse(file.path).name
     const targetDir = path.join(dir, title)
-    await fs.mkdir(targetDir)
+    await fs.mkdir(targetDir, {'recursive': true})
 
-    const idx = file.path.indexOf('/blog')
-    const fPath = file.path.slice(idx).replace(/\.md$/, '')
+    const md5Id = getPathMd5Id(file.path)
+    const postDir = path.join(postRootDir, `${md5Id}`)
+    await fs.mkdir(postDir, {'recursive': true})
 
-    await fs.writeFile(path.join(targetDir, `index.html`), createHtml(title, file.content, fPath))
+    await fs.writeFile(path.join(postDir, 'index.html'), createHtml(title, file.content, md5Id))
 
-    urls.push(fPath + '/')
+    const pidx = postDir.indexOf('posts')
+    urls.push('/' + postDir.slice(pidx) + '/')
   }
 
   if(cname) {
@@ -224,7 +269,7 @@ async function main() {
     await fs.writeFile(path.join(process.cwd(), 'sitemap.xml'), createSitemap(cname, basename, urls))
   }
 
-  await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8'), '/'))
+  await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8'), md5(appName)))
 
   if(cname) {
     await fs.writeFile(path.join(process.cwd(), 'CNAME'), cname)
