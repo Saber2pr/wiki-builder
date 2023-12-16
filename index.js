@@ -193,6 +193,7 @@ async function main() {
       }
     </style>
     <script>
+    window.__title = '${title}'
     window.__basename = '${basename}'
     window.__expandDirs = ${JSON.stringify(expandDirs)}
     window.__wiki = \`${wikiMd5}\`
