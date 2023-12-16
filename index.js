@@ -207,7 +207,7 @@ async function main() {
       <div class="ssr-wiki-menu">
         <div style="margin: 3rem 0 10rem">${wikiMenu}</div>
       </div>
-    </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title}</title>`)
+    </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title} - ${appName}</title>`)
     .replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.slice(0, 113)}…">`)
 
     if(gaId) {
@@ -253,7 +253,7 @@ async function main() {
     const postDir = path.join(postRootDir, `${md5Id}`)
     await fs.mkdir(postDir, {'recursive': true})
 
-    await fs.writeFile(path.join(postDir, 'index.html'), createHtml(`${title} - ${appName}`, file.content, md5Id, fPath))
+    await fs.writeFile(path.join(postDir, 'index.html'), createHtml(title, file.content, md5Id, fPath))
 
     const pidx = postDir.indexOf('posts')
     urls.push('/' + postDir.slice(pidx) + '/')
@@ -264,7 +264,7 @@ async function main() {
     await fs.writeFile(path.join(process.cwd(), 'sitemap.xml'), createSitemap(cname, basename, urls))
   }
 
-  await fs.writeFile(path.join(process.cwd(), '404.html'), createHtml(`404 - ${appName}`, createHtml404(basename), md5('404'), '/404'))
+  await fs.writeFile(path.join(process.cwd(), '404.html'), createHtml(`404`, createHtml404(basename), md5('404'), '/404'))
   await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8'), md5(appName), '/'))
 
   if(cname) {
