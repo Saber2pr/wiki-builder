@@ -65,7 +65,8 @@ const resolveMdLink = (content, basename) => {
 }
 
 const getPathMd5Id = (path) => {
-  if(path) {
+if(path) {
+    path = path.replace(/\.md$/, '')
     const tag = '/blog'
     const idx = path.indexOf(tag)
     const relPath = idx !== -1 ? path.slice(idx + tag.length) : path
