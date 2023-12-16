@@ -78,9 +78,9 @@ async function main() {
     return wiki
   }
 
-  const createHtml = (title, content, md5Id) => {
+  const createHtml = (title, content, md5Id, fPath) => {
     const wikiMd5 = renderWikiMd5(wiki, files)
-    const wikiMenu = renderWikiMenu(basename, wikiMd5, md5Id)
+    const {menu: wikiMenu, expandDirs} = renderWikiMenu(basename, wikiMd5, md5Id, fPath)
     let outHtml = template.replace('<head>', `<head>
     <style>
     html,
@@ -204,6 +204,7 @@ async function main() {
     </style>
     <script>
     window.__basename = '${basename}'
+    window.__expandDirs = ${JSON.stringify(expandDirs)}
     window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
     </script>`).replace('<div id="root"></div>', `<div id="root"><div class="ssr-topheader">
@@ -255,11 +256,14 @@ async function main() {
     const targetDir = path.join(dir, title)
     await fs.mkdir(targetDir, {'recursive': true})
 
+    const idx = file.path.indexOf('/blog')
+    const fPath = file.path.slice(idx)
+
     const md5Id = getPathMd5Id(file.path)
     const postDir = path.join(postRootDir, `${md5Id}`)
     await fs.mkdir(postDir, {'recursive': true})
 
-    await fs.writeFile(path.join(postDir, 'index.html'), createHtml(title, file.content, md5Id))
+    await fs.writeFile(path.join(postDir, 'index.html'), createHtml(title, file.content, md5Id, fPath))
 
     const pidx = postDir.indexOf('posts')
     urls.push('/' + postDir.slice(pidx) + '/')
@@ -270,16 +274,16 @@ async function main() {
     await fs.writeFile(path.join(process.cwd(), 'sitemap.xml'), createSitemap(cname, basename, urls))
   }
 
-  await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8'), md5(appName)))
+  await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8'), md5(appName), '/'))
 
   if(cname) {
     await fs.writeFile(path.join(process.cwd(), 'CNAME'), cname)
   }
 
   // deploy
-  execSync('git add .')
-  execSync(`git commit . -m 'chore: deploy wiki'`)
-  execSync(`git push origin -u -f master:gh-pages`)
+  // execSync('git add .')
+  // execSync(`git commit . -m 'chore: deploy wiki'`)
+  // execSync(`git push origin -u -f master:gh-pages`)
 }
 
 main().catch(console.log)
