@@ -20,7 +20,7 @@ const renderMenu = (basename, root, md5Id) => {
   const [nodeName, nodeMd5Id] = root.name.split(':')
 
   if(isLeaf) {
-    return `<a href="${basename}/posts/${nodeMd5Id}" class="ssr-a ${md5Id === nodeMd5Id ? 'ssr-a-active' : ''}">${nodeName}</a>`
+    return `<a href="${basename}/posts/${nodeMd5Id}/" class="ssr-a ${md5Id === nodeMd5Id ? 'ssr-a-active' : ''}">${nodeName}</a>`
   }
 
   const inner = getArray(root.children).map(item => `<li class="ssr-li">${renderMenu(basename, item, md5Id)}</li>`).join('\n')
