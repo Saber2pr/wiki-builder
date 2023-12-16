@@ -79,7 +79,8 @@ async function main() {
   }
 
   const createHtml = (title, content, md5Id) => {
-    const wikiMenu = renderWikiMenu(basename, wiki, md5Id)
+    const wikiMd5 = renderWikiMd5(wiki, files)
+    const wikiMenu = renderWikiMenu(basename, wikiMd5, md5Id)
     let outHtml = template.replace('<head>', `<head>
     <style>
     html,
@@ -203,7 +204,7 @@ async function main() {
     </style>
     <script>
     window.__basename = '${basename}'
-    window.__wiki = \`${renderWikiMd5(wiki, files)}\`
+    window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
     </script>`).replace('<div id="root"></div>', `<div id="root"><div class="ssr-topheader">
     <a class="ssr-topheader-a" href="${basename}/">${appName}</a>
@@ -276,9 +277,9 @@ async function main() {
   }
 
   // deploy
-  execSync('git add .')
-  execSync(`git commit . -m 'chore: deploy wiki'`)
-  execSync(`git push origin -u -f master:gh-pages`)
+  // execSync('git add .')
+  // execSync(`git commit . -m 'chore: deploy wiki'`)
+  // execSync(`git push origin -u -f master:gh-pages`)
 }
 
 main().catch(console.log)
