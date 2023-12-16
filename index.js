@@ -5,8 +5,7 @@ const path = require('path')
 const showdown  = require('showdown')
 const core = require('@actions/core')
 const { createSitemap } = require('./sitemap')
-const { renderWikiMenu, getPathMd5Id, resolveMdLink } = require('./renderWikiMenu')
-const md5 = require('md5')
+const { renderWikiMenu, getPathMd5Id, resolveMdLink, md5 } = require('./renderWikiMenu')
 
 const converter = new showdown.Converter()
 

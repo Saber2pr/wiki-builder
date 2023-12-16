@@ -1,5 +1,7 @@
 const { parse, getAbsPath } = require('@saber2pr/tree-lang')
-const md5 = require('md5')
+const crc = require('crc')
+
+const md5 = (str) => crc.crc32(str)
 
 const parseTree = (menu, base = "blog") => {
   const tree = parse(menu, n => {
@@ -78,5 +80,6 @@ if(path) {
 module.exports = {
   renderWikiMenu,
   getPathMd5Id,
-  resolveMdLink
+  resolveMdLink,
+  md5
 }
