@@ -16,5 +16,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.1
-      - uses: Saber2pr/wiki-builder@v0.0.42
+      - uses: Saber2pr/wiki-builder@v0.0.43
 ```
