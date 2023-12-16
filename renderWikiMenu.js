@@ -68,7 +68,7 @@ const getPathMd5Id = (path) => {
   if(path) {
     const tag = '/blog'
     const idx = path.indexOf(tag)
-    const relPath = path.slice(idx + tag.length)
+    const relPath = idx !== -1 ? path.slice(idx + tag.length) : path
     return relPath.split('/').filter(i => !!i).map(item => md5(item)).join('/')
   }
   return ''
