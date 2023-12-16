@@ -56,7 +56,7 @@ const resolveMdLink = (content, basename) => {
     return content.split('\n').map(line => {
       if(/\(\/blog\/([\s\S]*)?\)/.test(line) && /^\[/.test(line)&& /\)$/.test(line)) {
 
-        return line.replace(/\(\/blog\/([\s\S]*)?\)/, (_, str) => `(${basename}/${getPathMd5Id(str)}/)`)
+        return line.replace(/\(\/blog\/([\s\S]*)?\)/, (_, str) => `(${basename}/posts/${getPathMd5Id(str)}/)`)
       }
       return line
     }).join('\n')
