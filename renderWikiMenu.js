@@ -1,4 +1,5 @@
 const { parse, getAbsPath } = require('@saber2pr/tree-lang')
+const md5 = require('md5')
 
 const parseTree = (menu, base = "blog") => {
   const tree = parse(menu, n => {
@@ -50,6 +51,31 @@ const renderWikiMenu = (basename, wiki, md5Id, fPath) => {
   }
 }
 
+const resolveMdLink = (content, basename) => {
+  if(typeof content === 'string') {
+    return content.split('\n').map(line => {
+      if(/\(\/blog\/([\s\S]*)?\)/.test(line) && /^\[/.test(line)&& /\)$/.test(line)) {
+
+        return line.replace(/\(\/blog\/([\s\S]*)?\)/, (_, str) => `(${basename}/${getPathMd5Id(str)}/)`)
+      }
+      return line
+    }).join('\n')
+  }
+  return ''
+}
+
+const getPathMd5Id = (path) => {
+  if(path) {
+    const tag = '/blog'
+    const idx = path.indexOf(tag)
+    const relPath = path.slice(idx + tag.length)
+    return relPath.split('/').filter(i => !!i).map(item => md5(item)).join('/')
+  }
+  return ''
+}
+
 module.exports = {
-  renderWikiMenu
+  renderWikiMenu,
+  getPathMd5Id,
+  resolveMdLink
 }

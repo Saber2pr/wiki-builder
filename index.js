@@ -5,7 +5,7 @@ const path = require('path')
 const showdown  = require('showdown')
 const core = require('@actions/core')
 const { createSitemap } = require('./sitemap')
-const { renderWikiMenu } = require('./renderWikiMenu')
+const { renderWikiMenu, getPathMd5Id, resolveMdLink } = require('./renderWikiMenu')
 const md5 = require('md5')
 
 const converter = new showdown.Converter()
@@ -46,16 +46,6 @@ async function main() {
   const template = await fs.readFile('./index.html', 'utf-8')
   const wiki = await fs.readFile('./wiki', 'utf-8')
 
-  const getPathMd5Id = (path) => {
-    if(path) {
-      const tag = '/blog'
-      const idx = path.indexOf(tag)
-      const relPath = path.slice(idx + tag.length)
-      return relPath.split('/').filter(i => !!i).map(item => md5(item)).join('/')
-    }
-    return ''
-  }
-
   // render md5
   /**
    * @param {*} wiki 
@@ -79,6 +69,7 @@ async function main() {
   }
 
   const createHtml = (title, content, md5Id, fPath) => {
+    content = resolveMdLink(content, basename)
     const wikiMd5 = renderWikiMd5(wiki, files)
     const {menu: wikiMenu, expandDirs} = renderWikiMenu(basename, wikiMd5, md5Id, fPath)
     let outHtml = template.replace('<head>', `<head>
