@@ -77,9 +77,16 @@ if(path) {
   return ''
 }
 
+const createHtml404 = (basename) => `### Page not found
+
+The page you visited is moved or deleted.
+
+[Back to home page](${basename}/)`
+
 module.exports = {
   renderWikiMenu,
   getPathMd5Id,
   resolveMdLink,
-  md5
+  md5,
+  createHtml404
 }

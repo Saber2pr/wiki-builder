@@ -5,7 +5,7 @@ const path = require('path')
 const showdown  = require('showdown')
 const core = require('@actions/core')
 const { createSitemap } = require('./sitemap')
-const { renderWikiMenu, getPathMd5Id, resolveMdLink, md5 } = require('./renderWikiMenu')
+const { renderWikiMenu, getPathMd5Id, resolveMdLink, md5, createHtml404 } = require('./renderWikiMenu')
 
 const converter = new showdown.Converter()
 
@@ -253,7 +253,7 @@ async function main() {
     const postDir = path.join(postRootDir, `${md5Id}`)
     await fs.mkdir(postDir, {'recursive': true})
 
-    await fs.writeFile(path.join(postDir, 'index.html'), createHtml(title, file.content, md5Id, fPath))
+    await fs.writeFile(path.join(postDir, 'index.html'), createHtml(`${title} - ${appName}`, file.content, md5Id, fPath))
 
     const pidx = postDir.indexOf('posts')
     urls.push('/' + postDir.slice(pidx) + '/')
@@ -264,6 +264,7 @@ async function main() {
     await fs.writeFile(path.join(process.cwd(), 'sitemap.xml'), createSitemap(cname, basename, urls))
   }
 
+  await fs.writeFile(path.join(process.cwd(), '404.html'), createHtml(`404 - ${appName}`, createHtml404(basename), md5('404'), '/404'))
   await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8'), md5(appName), '/'))
 
   if(cname) {
