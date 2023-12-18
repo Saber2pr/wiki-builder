@@ -191,6 +191,19 @@ async function main() {
         top:40px;
         overflow-y:auto;
       }
+
+      #root-pre {
+        width: 100vw;
+        min-height: 100vh;
+        position: fixed;
+        left:0;
+        top:0;
+        z-index:999;
+      }
+      #root {
+        position: relative;
+        z-index:0;
+      }
     </style>
     <script>
     window.__title = "${title}"
