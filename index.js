@@ -194,7 +194,8 @@ async function main() {
 
       #root-pre {
         width: 100vw;
-        min-height: 100vh;
+        height: 100vh;
+        overflow: auto;
         position: fixed;
         left:0;
         top:0;
