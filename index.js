@@ -198,7 +198,7 @@ async function main() {
     window.__expandDirs = ${JSON.stringify(expandDirs)}
     window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
-    </script>`).replace('<div id="root"></div>', `<div id="root"><div class="ssr-topheader">
+    </script>`).replace('<div id="root"></div>', `<div id="root-pre"><div class="ssr-topheader">
     <a class="ssr-topheader-a" href="${basename}/">${appName}</a>
     </div><div style="margin: 0 4.5rem;display:flex;">
       <div style="width:70%;">
@@ -208,7 +208,7 @@ async function main() {
       <div class="ssr-wiki-menu">
         <div style="margin: 3rem 0 10rem">${wikiMenu}</div>
       </div>
-    </div></div>`).replace('<title>saber2prの窝</title>', `<title>${title === appName ? title : `${title} - ${appName}`}</title>`)
+    </div></div><div id="root"></div>`).replace('<title>saber2prの窝</title>', `<title>${title === appName ? title : `${title} - ${appName}`}</title>`)
     .replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.slice(0, 113)}…">`)
 
     if(gaId) {
