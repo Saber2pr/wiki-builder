@@ -72,7 +72,7 @@ async function main() {
     content = resolveMdLink(content, basename)
     const wikiMd5 = renderWikiMd5(wiki, files)
     const {menu: wikiMenu, expandDirs} = renderWikiMenu(basename, wikiMd5, md5Id, fPath)
-    let outHtml = template.replace(`/__$basename$__`, basename).replace('<head>', `<head>
+    let outHtml = template.replaceAll(`/__$basename$__`, basename).replace('<head>', `<head>
     <style>
     html,
     body {
