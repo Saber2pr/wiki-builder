@@ -36,13 +36,14 @@ async function main() {
   execSync(`cd blog && find . | sed -e "s/[^-][^/]*\\//  /g" -e "s/\.md//" | awk '{print substr($0, 3)}'  > ../wiki`)
 
   // download wiki app
-  execSync(`curl "https://raw.githubusercontent.com/Saber2pr/wiki/master/release/index.html" > index.html`)
+  execSync(`curl "https://raw.githubusercontent.com/Saber2pr/wiki/master/build/wiki-release.tar.gz" > ./wiki-release.tar.gz`)
+  execSync(`tar -xvf ./wiki-release.tar.gz`)
   execSync('touch .nojekyll')
 
   // inject static props
   // 1. add __wiki
   // 2. add content
-  const template = await fs.readFile('./index.html', 'utf-8')
+  const template = await fs.readFile('./release/index.html', 'utf-8')
   const wiki = await fs.readFile('./wiki', 'utf-8')
 
   // render md5
@@ -71,7 +72,7 @@ async function main() {
     content = resolveMdLink(content, basename)
     const wikiMd5 = renderWikiMd5(wiki, files)
     const {menu: wikiMenu, expandDirs} = renderWikiMenu(basename, wikiMd5, md5Id, fPath)
-    let outHtml = template.replace('<head>', `<head>
+    let outHtml = template.replace(`/__$basename$__`, basename).replace('<head>', `<head>
     <style>
     html,
     body {
