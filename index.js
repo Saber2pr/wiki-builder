@@ -243,7 +243,11 @@ async function main() {
     }
     if(gaAdId) {
       outHtml = outHtml.replace('<head>', `<head>
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${gaAdId}" crossorigin="anonymous"></script>`)
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${gaAdId}" crossorigin="anonymous"></script>
+      <script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+      `)
     }
 
     if(iconUrl) {
