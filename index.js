@@ -15,7 +15,9 @@ async function main() {
   const basename = core.getInput('basename') || ''
   const cname = core.getInput('cname')
   const gaId = core.getInput('gaId')
+  const gaAdId = core.getInput('gaAdId')
   const iconUrl = core.getInput('iconUrl')
+  const backgroundImage = core.getInput('backgroundImage')
 
   // config
   execSync('git config user.name github-actions')
@@ -209,6 +211,7 @@ async function main() {
     </style>
     <script>
     window.__title = "${title}"
+    window.__backgroundImage = ""
     window.__basename = '${basename}'
     window.__expandDirs = ${JSON.stringify(expandDirs)}
     window.__wiki = \`${wikiMd5}\`
@@ -236,6 +239,10 @@ async function main() {
       
         gtag('config', '${gaId}');
       </script>`)
+    }
+    if(gaAdId) {
+      outHtml = outHtml.replace('<head>', `<head>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${gaAdId}" crossorigin="anonymous"></script>`)
     }
 
     if(iconUrl) {

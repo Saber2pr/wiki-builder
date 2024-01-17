@@ -17,6 +17,9 @@ inputs:
   gaId:
     required: false
     description: 'google analyse ga id'
+  gaAdId:
+    required: false
+    description: 'google ad id'
   iconUrl:
     required: false
     description: 'favicon url'
