@@ -23,6 +23,9 @@ inputs:
   gaAdsTxt:
     required: false
     description: 'google ads txt'
+  gaAdsSlotHtml:
+    required: false
+    description: 'google ads slot html'
   iconUrl:
     required: false
     description: 'favicon url'

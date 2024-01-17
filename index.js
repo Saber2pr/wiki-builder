@@ -17,6 +17,7 @@ async function main() {
   const gaId = core.getInput('gaId')
   const gaAdId = core.getInput('gaAdId')
   const gaAdsTxt = core.getInput('gaAdsTxt')
+  const gaAdsSlotHtml = core.getInput('gaAdsSlotHtml')
   const iconUrl = core.getInput('iconUrl')
   const backgroundImage = core.getInput('backgroundImage')
 
@@ -214,6 +215,7 @@ async function main() {
     window.__title = "${title}"
     window.__backgroundImage = ""
     window.__basename = '${basename}'
+    window.__adsSlotHtml = '${gaAdsSlotHtml}'
     window.__expandDirs = ${JSON.stringify(expandDirs)}
     window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
