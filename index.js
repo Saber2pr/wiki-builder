@@ -215,7 +215,7 @@ async function main() {
     window.__title = "${title}"
     window.__backgroundImage = ""
     window.__basename = '${basename}'
-    window.__adsSlotHtml = '${gaAdsSlotHtml}'
+    window.__adsSlotHtml = '${encodeURIComponent(gaAdsSlotHtml)}'
     window.__expandDirs = ${JSON.stringify(expandDirs)}
     window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
