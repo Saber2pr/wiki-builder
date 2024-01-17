@@ -16,6 +16,7 @@ async function main() {
   const cname = core.getInput('cname')
   const gaId = core.getInput('gaId')
   const gaAdId = core.getInput('gaAdId')
+  const gaAdsTxt = core.getInput('gaAdsTxt')
   const iconUrl = core.getInput('iconUrl')
   const backgroundImage = core.getInput('backgroundImage')
 
@@ -292,6 +293,9 @@ async function main() {
 
   if(cname) {
     await fs.writeFile(path.join(process.cwd(), 'CNAME'), cname)
+  }
+  if(gaAdsTxt) {
+    await fs.writeFile(path.join(process.cwd(), 'ads.txt'), gaAdsTxt)
   }
 
   // deploy

@@ -20,6 +20,9 @@ inputs:
   gaAdId:
     required: false
     description: 'google ad id'
+  gaAdsTxt:
+    required: false
+    description: 'google ads txt'
   iconUrl:
     required: false
     description: 'favicon url'
