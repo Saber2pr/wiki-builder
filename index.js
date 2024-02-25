@@ -181,7 +181,7 @@ async function main() {
       .ssr-content-title {
         word-break: break-all;
         font-size: 3rem;
-        margin-top: 3rem;
+        margin-top: calc(3rem + 40px);
         margin-left: 1rem;
         margin-right: 1rem;
       }
