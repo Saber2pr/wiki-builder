@@ -33,5 +33,5 @@ inputs:
     required: false
     description: 'favicon url'
 runs:
-    using: 'node16'
+    using: 'node20'
     main: dist/index.js
