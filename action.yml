@@ -26,6 +26,9 @@ inputs:
   gaAdsSlotHtml:
     required: false
     description: 'google ads slot html'
+  i18nConfig:
+    required: false
+    description: 'i18nConfig json'
   iconUrl:
     required: false
     description: 'favicon url'

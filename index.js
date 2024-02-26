@@ -20,6 +20,7 @@ async function main() {
   const gaAdsSlotHtml = core.getInput('gaAdsSlotHtml')
   const iconUrl = core.getInput('iconUrl')
   const backgroundImage = core.getInput('backgroundImage')
+  const i18nConfig = core.getInput('i18nConfig')
 
   // config
   execSync('git config user.name github-actions')
@@ -216,6 +217,7 @@ async function main() {
     window.__backgroundImage = ""
     window.__basename = '${basename}'
     window.__adsSlotHtml = '${encodeURIComponent(gaAdsSlotHtml)}'
+    window.__i18nConfig = ${i18nConfig || 'null'}
     window.__expandDirs = ${JSON.stringify(expandDirs)}
     window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
