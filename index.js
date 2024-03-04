@@ -21,6 +21,7 @@ async function main() {
   const iconUrl = core.getInput('iconUrl')
   const backgroundImage = core.getInput('backgroundImage')
   const i18nConfig = core.getInput('i18nConfig')
+  const expandAllMenu = core.getInput('expandAllMenu')
 
   // config
   execSync('git config user.name github-actions')
@@ -216,6 +217,7 @@ async function main() {
     window.__title = "${title}"
     window.__backgroundImage = ""
     window.__basename = '${basename}'
+    window.__expandAllMenu = '${expandAllMenu || ''}'
     window.__adsSlotHtml = '${encodeURIComponent(gaAdsSlotHtml)}'
     window.__i18nConfig = ${i18nConfig || 'null'}
     window.__expandDirs = ${JSON.stringify(expandDirs)}

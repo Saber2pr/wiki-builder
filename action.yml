@@ -32,6 +32,9 @@ inputs:
   iconUrl:
     required: false
     description: 'favicon url'
+  expandAllMenu:
+    required: false
+    description: 'expand all menu'
 runs:
     using: 'node20'
     main: dist/index.js
