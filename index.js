@@ -260,7 +260,7 @@ async function main() {
     if(indexDesc) {
       outHtml = outHtml.replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', indexDesc)
     } else {
-      outHtml = outHtml.replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.slice(0, 113)}…">`)
+      outHtml = outHtml.replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.replace(/"/g, ' ').slice(0, 113)}…">`)
     }
 
     if(gaId) {
