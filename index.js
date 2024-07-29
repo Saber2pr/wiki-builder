@@ -35,7 +35,7 @@ async function main() {
   // get home md
   const rootFiles = await fs.readdir(process.cwd())
   const homeFile = rootFiles.find(item => /\.md$/.test(item))
-  const appName = getMdName(homeFile)
+  const appName = params_title || getMdName(homeFile)
 
   // create blog, collect md files
   execSync('mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} ')
