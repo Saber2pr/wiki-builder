@@ -35,7 +35,7 @@ async function main() {
   // get home md
   const rootFiles = await fs.readdir(process.cwd())
   const homeFile = rootFiles.find(item => /\.md$/.test(item))
-  const appName = params_title || getMdName(homeFile)
+  const appName = getMdName(homeFile)
 
   // create blog, collect md files
   execSync('mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} ')
@@ -249,7 +249,8 @@ async function main() {
     if(indexTitle) {
       outHtml = outHtml.replace('<title>saber2prの窝</title>', indexTitle)
     } else {
-      outHtml = outHtml.replace('<title>saber2prの窝</title>', `<title>${title === appName ? title : `${title} - ${appName}`}</title>`)
+      const displayTitle = params_title || appName
+      outHtml = outHtml.replace('<title>saber2prの窝</title>', `<title>${title === appName ? displayTitle : `${title} - ${displayTitle}`}</title>`)
     }
 
     if(indexKeywords) {
