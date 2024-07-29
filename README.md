@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.1
-      - uses: Saber2pr/wiki-builder@v0.0.63
+      - uses: Saber2pr/wiki-builder@v0.0.66
 ```
 
 1. live demo: [Saber2pr's Blog](https://saber2pr.top/)
@@ -32,7 +32,7 @@ When CI is built, it will be compiled into HTML static files, which is SEO frien
 
 ```yml
 - uses: actions/checkout@v4.1.1
-- uses: Saber2pr/wiki-builder@v0.0.64
+- uses: Saber2pr/wiki-builder@v0.0.66
   with:
     cname: saber2pr.top # optional, your website cname
     gaId: G-XXX # optional, your google analytics gid 
