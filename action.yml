@@ -35,6 +35,15 @@ inputs:
   expandAllMenu:
     required: false
     description: 'expand all menu'
+  title:
+    required: false
+    description: 'seo title'
+  keywords:
+    required: false
+    description: 'seo keywords'
+  description:
+    required: false
+    description: 'seo description'
 runs:
     using: 'node20'
     main: dist/index.js

@@ -23,6 +23,11 @@ async function main() {
   const i18nConfig = core.getInput('i18nConfig')
   const expandAllMenu = core.getInput('expandAllMenu')
 
+  // seo
+  const params_title = core.getInput('title')
+  const params_keywords = core.getInput('keywords')
+  const params_description = core.getInput('description')
+
   // config
   execSync('git config user.name github-actions')
   execSync('git config user.email github-actions@github.com')
@@ -75,6 +80,12 @@ async function main() {
   }
 
   const createHtml = (title, content, md5Id, fPath) => {
+    const isIndex = fPath === '/'
+
+    const indexTitle = (params_title && isIndex) ? `<title>${params_title}</title>` : ''
+    const indexKeywords = (params_keywords && isIndex) ? `<meta name="keywords" content="${params_keywords}">` : ''
+    const indexDesc = (params_description && isIndex) ? `<meta name="description" content="${params_description}">` : ''
+
     content = resolveMdLink(content, basename)
     const wikiMd5 = renderWikiMd5(wiki, files)
     const {menu: wikiMenu, expandDirs} = renderWikiMenu(basename, wikiMd5, md5Id, fPath)
@@ -233,8 +244,23 @@ async function main() {
       <div class="ssr-wiki-menu">
         <div style="margin: 3rem 0 10rem">${wikiMenu}</div>
       </div>
-    </div></div><div id="root"></div>`).replace('<title>saber2prの窝</title>', `<title>${title === appName ? title : `${title} - ${appName}`}</title>`)
-    .replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.slice(0, 113)}…">`)
+    </div></div><div id="root"></div>`)
+
+    if(indexTitle) {
+      outHtml = outHtml.replace('<title>saber2prの窝</title>', indexTitle)
+    } else {
+      outHtml = outHtml.replace('<title>saber2prの窝</title>', `<title>${title === appName ? title : `${title} - ${appName}`}</title>`)
+    }
+
+    if(indexKeywords) {
+      outHtml = outHtml.replace('<meta name="keywords" content="react,antd,typescript,javascript,css,html,前端学习,前端进阶,个人博客">', indexKeywords)
+    }
+
+    if(indexDesc) {
+      outHtml = outHtml.replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', indexDesc)
+    } else {
+      outHtml = outHtml.replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.slice(0, 113)}…">`)
+    }
 
     if(gaId) {
       outHtml = outHtml.replace('<head>', `<head>
