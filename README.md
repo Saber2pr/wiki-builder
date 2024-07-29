@@ -41,5 +41,7 @@ When CI is built, it will be compiled into HTML static files, which is SEO frien
     gaAdsSlotHtml: <ins class="adsbygoogle"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script> # optional, your google adsense html
     iconUrl: //saber2pr.top/MyWeb/resource/image/saber2pr-top.ico # optional, your website icon
     i18nConfig: '[{"name":"English","key":"/"},{"name":"Chinese","key":"/zh"}]' # optional, your website i18n support
-
+    title: MyBlog
+    keywords: blog,js,html,css
+    description: this is my blog
 ```
