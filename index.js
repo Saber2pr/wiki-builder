@@ -83,7 +83,7 @@ async function main() {
     const isIndex = fPath === '/'
 
     const indexTitle = (params_title && isIndex) ? `<title>${params_title}</title>` : ''
-    const indexKeywords = (params_keywords && isIndex) ? `<meta name="keywords" content="${params_keywords}">` : ''
+    const indexKeywords = params_keywords ? `<meta name="keywords" content="${params_keywords}">` : ''
     const indexDesc = (params_description && isIndex) ? `<meta name="description" content="${params_description}">` : ''
 
     content = resolveMdLink(content, basename)
