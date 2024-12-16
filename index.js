@@ -1,95 +1,126 @@
-const { execSync } = require("child_process")
-const tp = require('@saber2pr/ts-compiler')
-const fs = require('fs-extra')
-const path = require('path')
-const showdown  = require('showdown')
-const core = require('@actions/core')
-const { createSitemap } = require('./sitemap')
-const { renderWikiMenu, getPathMd5Id, resolveMdLink, md5, createHtml404 } = require('./renderWikiMenu')
+const { execSync } = require("child_process");
+const tp = require("@saber2pr/ts-compiler");
+const fs = require("fs-extra");
+const path = require("path");
+const showdown = require("showdown");
+const core = require("@actions/core");
+const { createSitemap } = require("./sitemap");
+const {
+  renderWikiMenu,
+  getPathMd5Id,
+  resolveMdLink,
+  md5,
+  createHtml404,
+} = require("./renderWikiMenu");
 
-const converter = new showdown.Converter()
+const converter = new showdown.Converter();
 
-const getMdName = mdFileName => mdFileName ? mdFileName.split('.')[0] : ''
+const getMdName = (mdFileName) => (mdFileName ? mdFileName.split(".")[0] : "");
 
 async function main() {
-  const basename = core.getInput('basename') || ''
-  const cname = core.getInput('cname')
-  const gaId = core.getInput('gaId')
-  const gaAdId = core.getInput('gaAdId')
-  const gaAdsTxt = core.getInput('gaAdsTxt')
-  const gaAdsSlotHtml = core.getInput('gaAdsSlotHtml')
-  const iconUrl = core.getInput('iconUrl')
-  const backgroundImage = core.getInput('backgroundImage')
-  const i18nConfig = core.getInput('i18nConfig')
-  const expandAllMenu = core.getInput('expandAllMenu')
+  const basename = core.getInput("basename") || "";
+  const cname = core.getInput("cname");
+  const gaId = core.getInput("gaId");
+  const gaAdId = core.getInput("gaAdId");
+  const gaAdsTxt = core.getInput("gaAdsTxt");
+  const gaAdsSlotHtml = core.getInput("gaAdsSlotHtml");
+  const iconUrl = core.getInput("iconUrl");
+  const backgroundImage = core.getInput("backgroundImage");
+  const i18nConfig = core.getInput("i18nConfig");
+  const expandAllMenu = core.getInput("expandAllMenu");
+  const ignoreCnameFile = core.getInput("ignoreCnameFile");
 
   // seo
-  const params_title = core.getInput('title')
-  const params_keywords = core.getInput('keywords')
-  const params_description = core.getInput('description')
+  const params_title = core.getInput("title");
+  const params_keywords = core.getInput("keywords");
+  const params_description = core.getInput("description");
 
   // config
-  execSync('git config user.name github-actions')
-  execSync('git config user.email github-actions@github.com')
+  execSync("git config user.name github-actions");
+  execSync("git config user.email github-actions@github.com");
 
   // get home md
-  const rootFiles = await fs.readdir(process.cwd())
-  const homeFile = rootFiles.find(item => /\.md$/.test(item))
-  const appName = getMdName(homeFile)
+  const rootFiles = await fs.readdir(process.cwd());
+  const homeFile = rootFiles.find((item) => /\.md$/.test(item));
+  const appName = getMdName(homeFile);
 
   // create blog, collect md files
-  execSync('mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} ')
-  await fs.copy(`./${appName}.md`, `./blog/${appName}.md`)
-  execSync('find ./blog -type f -not -name "*.md" | xargs -I {} rm -rf {}')
-  execSync('find ./blog -type d -empty | xargs -n 1 rm -rf')
+  execSync(
+    'mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} '
+  );
+  await fs.copy(`./${appName}.md`, `./blog/${appName}.md`);
+  execSync('find ./blog -type f -not -name "*.md" | xargs -I {} rm -rf {}');
+  execSync("find ./blog -type d -empty | xargs -n 1 rm -rf");
 
   // render menu
-  execSync(`cd blog && find . | sed -e "s/[^-][^/]*\\//  /g" -e "s/\.md//" | awk '{print substr($0, 3)}'  > ../wiki`)
+  execSync(
+    `cd blog && find . | sed -e "s/[^-][^/]*\\//  /g" -e "s/\.md//" | awk '{print substr($0, 3)}'  > ../wiki`
+  );
 
   // download wiki app
-  execSync(`curl "https://raw.githubusercontent.com/Saber2pr/wiki/master/build/wiki-release.tar.gz" > ./wiki-release.tar.gz`)
-  execSync(`tar -xvf ./wiki-release.tar.gz`)
-  execSync('touch .nojekyll')
+  execSync(
+    `curl "https://raw.githubusercontent.com/Saber2pr/wiki/master/build/wiki-release.tar.gz" > ./wiki-release.tar.gz`
+  );
+  execSync(`tar -xvf ./wiki-release.tar.gz`);
+  execSync("touch .nojekyll");
 
   // inject static props
   // 1. add __wiki
   // 2. add content
-  const template = await fs.readFile('./release/index.html', 'utf-8')
-  const wiki = await fs.readFile('./wiki', 'utf-8')
+  const template = await fs.readFile("./release/index.html", "utf-8");
+  const wiki = await fs.readFile("./wiki", "utf-8");
 
   // render md5
   /**
-   * @param {*} wiki 
-   * @param {tp.EntryResult[]} files 
-   * @returns 
+   * @param {*} wiki
+   * @param {tp.EntryResult[]} files
+   * @returns
    */
   const renderWikiMd5 = (wiki, files) => {
-    if(wiki) {
-      return wiki.split('\n').map(line => {
-        const text = line.trim()
-        if(text) {
-          const file = files.find(item => getMdName(item.name) === text)
-          if(file) {
-            return `${line}:${getPathMd5Id(file.path)}`
+    if (wiki) {
+      return wiki
+        .split("\n")
+        .map((line) => {
+          const text = line.trim();
+          if (text) {
+            const file = files.find((item) => getMdName(item.name) === text);
+            if (file) {
+              return `${line}:${getPathMd5Id(file.path)}`;
+            }
+            return `${line}`;
           }
-          return `${line}`
-        }
-      }).join('\n')
+        })
+        .join("\n");
     }
-    return wiki
-  }
+    return wiki;
+  };
 
   const createHtml = (title, content, md5Id, fPath) => {
-    const isIndex = fPath === '/'
+    const isIndex = fPath === "/";
 
-    const indexTitle = (params_title && isIndex) ? `<title>${params_title}</title>` : ''
-    const indexKeywords = params_keywords ? `<meta name="keywords" content="${params_keywords}">` : ''
-    const indexDesc = (params_description && isIndex) ? `<meta name="description" content="${params_description}">` : ''
+    const indexTitle =
+      params_title && isIndex ? `<title>${params_title}</title>` : "";
+    const indexKeywords = params_keywords
+      ? `<meta name="keywords" content="${params_keywords}">`
+      : "";
+    const indexDesc =
+      params_description && isIndex
+        ? `<meta name="description" content="${params_description}">`
+        : "";
 
-    content = resolveMdLink(content, basename)
-    const wikiMd5 = renderWikiMd5(wiki, files)
-    const {menu: wikiMenu, expandDirs} = renderWikiMenu(basename, wikiMd5, md5Id, fPath)
-    let outHtml = template.replaceAll(`/__$basename$__`, basename).replace('<head>', `<head>
+    content = resolveMdLink(content, basename);
+    const wikiMd5 = renderWikiMd5(wiki, files);
+    const { menu: wikiMenu, expandDirs } = renderWikiMenu(
+      basename,
+      wikiMd5,
+      md5Id,
+      fPath
+    );
+    let outHtml = template
+      .replaceAll(`/__$basename$__`, basename)
+      .replace(
+        "<head>",
+        `<head>
     <style>
     html,
     body {
@@ -228,43 +259,68 @@ async function main() {
     window.__title = "${title}"
     window.__backgroundImage = ""
     window.__basename = '${basename}'
-    window.__expandAllMenu = '${expandAllMenu || ''}'
+    window.__expandAllMenu = '${expandAllMenu || ""}'
     window.__adsSlotHtml = '${encodeURIComponent(gaAdsSlotHtml)}'
-    window.__i18nConfig = ${i18nConfig || 'null'}
+    window.__i18nConfig = ${i18nConfig || "null"}
     window.__expandDirs = ${JSON.stringify(expandDirs)}
     window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
-    </script>`).replace('<div id="root"></div>', `<div id="root-pre"><div class="ssr-topheader">
+    </script>`
+      )
+      .replace(
+        '<div id="root"></div>',
+        `<div id="root-pre"><div class="ssr-topheader">
     <a class="ssr-topheader-a" href="${basename}/">${appName}</a>
     </div><div style="margin: 0 4.5rem;display:flex;">
       <div style="width:70%;">
         <h1 class="ssr-content-title">${title}</h1>
-        <div style="margin:1rem;padding:1rem;">${converter.makeHtml(content)}</div>
+        <div style="margin:1rem;padding:1rem;">${converter.makeHtml(
+          content
+        )}</div>
       </div>
       <div class="ssr-wiki-menu">
         <div style="margin: 3rem 0 10rem">${wikiMenu}</div>
       </div>
-    </div></div><div id="root"></div>`)
+    </div></div><div id="root"></div>`
+      );
 
-    if(indexTitle) {
-      outHtml = outHtml.replace('<title>saber2prの窝</title>', indexTitle)
+    if (indexTitle) {
+      outHtml = outHtml.replace("<title>saber2prの窝</title>", indexTitle);
     } else {
-      const displayTitle = params_title || appName
-      outHtml = outHtml.replace('<title>saber2prの窝</title>', `<title>${title === appName ? displayTitle : `${title} - ${displayTitle}`}</title>`)
+      const displayTitle = params_title || appName;
+      outHtml = outHtml.replace(
+        "<title>saber2prの窝</title>",
+        `<title>${
+          title === appName ? displayTitle : `${title} - ${displayTitle}`
+        }</title>`
+      );
     }
 
-    if(indexKeywords) {
-      outHtml = outHtml.replace('<meta name="keywords" content="react,antd,typescript,javascript,css,html,前端学习,前端进阶,个人博客">', indexKeywords)
+    if (indexKeywords) {
+      outHtml = outHtml.replace(
+        '<meta name="keywords" content="react,antd,typescript,javascript,css,html,前端学习,前端进阶,个人博客">',
+        indexKeywords
+      );
     }
 
-    if(indexDesc) {
-      outHtml = outHtml.replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', indexDesc)
+    if (indexDesc) {
+      outHtml = outHtml.replace(
+        '<meta name="description" content="长期更新前端技术文章,分享前端技术经验">',
+        indexDesc
+      );
     } else {
-      outHtml = outHtml.replace('<meta name="description" content="长期更新前端技术文章,分享前端技术经验">', `<meta name="description" content="${content.replace(/"/g, ' ').slice(0, 113)}…">`)
+      outHtml = outHtml.replace(
+        '<meta name="description" content="长期更新前端技术文章,分享前端技术经验">',
+        `<meta name="description" content="${content
+          .replace(/"/g, " ")
+          .slice(0, 113)}…">`
+      );
     }
 
-    if(gaId) {
-      outHtml = outHtml.replace('<head>', `<head>
+    if (gaId) {
+      outHtml = outHtml.replace(
+        "<head>",
+        `<head>
       <script async src="https://www.googletagmanager.com/gtag/js?id=${gaId}"></script>
       <script>
         window.dataLayer = window.dataLayer || [];
@@ -272,69 +328,103 @@ async function main() {
         gtag('js', new Date());
       
         gtag('config', '${gaId}');
-      </script>`)
+      </script>`
+      );
     }
-    if(gaAdId) {
-      outHtml = outHtml.replace('<head>', `<head>
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${gaAdId}" crossorigin="anonymous"></script>`)
+    if (gaAdId) {
+      outHtml = outHtml.replace(
+        "<head>",
+        `<head>
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${gaAdId}" crossorigin="anonymous"></script>`
+      );
     }
 
-    if(iconUrl) {
-      outHtml = outHtml.replace('<head>', `<head>
-      <link rel="icon" href="${iconUrl}" type="image/x-icon" />`)
+    if (iconUrl) {
+      outHtml = outHtml.replace(
+        "<head>",
+        `<head>
+      <link rel="icon" href="${iconUrl}" type="image/x-icon" />`
+      );
     }
 
-    return outHtml
-  }
+    return outHtml;
+  };
 
-  const urls = []
-  const files = await tp.walkFile('./blog', entry => /\.md$/.test(entry.path), {withContent: true})
+  const urls = [];
+  const files = await tp.walkFile(
+    "./blog",
+    (entry) => /\.md$/.test(entry.path),
+    { withContent: true }
+  );
 
-  const postRootDir = path.join(process.cwd(), 'posts')
+  const postRootDir = path.join(process.cwd(), "posts");
   try {
-    await fs.mkdir(postRootDir, {'recursive': true})
-  } catch (error) {
-    
+    await fs.mkdir(postRootDir, { recursive: true });
+  } catch (error) {}
+
+  for (const file of files) {
+    const dir = path.dirname(file.path);
+    const title = path.parse(file.path).name;
+    const targetDir = path.join(dir, title);
+    await fs.mkdir(targetDir, { recursive: true });
+
+    const idx = file.path.indexOf("/blog");
+    const fPath = file.path.slice(idx);
+
+    const md5Id = getPathMd5Id(file.path);
+    const postDir = path.join(postRootDir, `${md5Id}`);
+    await fs.mkdir(postDir, { recursive: true });
+
+    await fs.writeFile(
+      path.join(postDir, "index.html"),
+      createHtml(title, file.content, md5Id, fPath)
+    );
+
+    const pidx = postDir.indexOf("posts");
+    urls.push("/" + postDir.slice(pidx) + "/");
   }
 
-  for(const file of files){
-    const dir = path.dirname(file.path)
-    const title = path.parse(file.path).name
-    const targetDir = path.join(dir, title)
-    await fs.mkdir(targetDir, {'recursive': true})
-
-    const idx = file.path.indexOf('/blog')
-    const fPath = file.path.slice(idx)
-
-    const md5Id = getPathMd5Id(file.path)
-    const postDir = path.join(postRootDir, `${md5Id}`)
-    await fs.mkdir(postDir, {'recursive': true})
-
-    await fs.writeFile(path.join(postDir, 'index.html'), createHtml(title, file.content, md5Id, fPath))
-
-    const pidx = postDir.indexOf('posts')
-    urls.push('/' + postDir.slice(pidx) + '/')
+  if (cname) {
+    await fs.writeFile(
+      path.join(process.cwd(), "robots.txt"),
+      `Sitemap: https://${cname}/sitemap.xml`
+    );
+    await fs.writeFile(
+      path.join(process.cwd(), "sitemap.xml"),
+      createSitemap(cname, basename, urls)
+    );
   }
 
-  if(cname) {
-    await fs.writeFile(path.join(process.cwd(), 'robots.txt'), `Sitemap: https://${cname}/sitemap.xml`)
-    await fs.writeFile(path.join(process.cwd(), 'sitemap.xml'), createSitemap(cname, basename, urls))
+  await fs.writeFile(
+    path.join(process.cwd(), "404.html"),
+    createHtml(`404`, createHtml404(basename), md5("404"), "/404")
+  );
+  await fs.writeFile(
+    path.join(process.cwd(), "index.html"),
+    createHtml(
+      appName,
+      await fs.readFile(`./${appName}.md`, "utf-8"),
+      md5(appName),
+      "/"
+    )
+  );
+
+  if (ignoreCnameFile) {
+    // noop
+  } else {
+    if (cname) {
+      await fs.writeFile(path.join(process.cwd(), "CNAME"), cname);
+    }
   }
 
-  await fs.writeFile(path.join(process.cwd(), '404.html'), createHtml(`404`, createHtml404(basename), md5('404'), '/404'))
-  await fs.writeFile(path.join(process.cwd(), 'index.html'), createHtml(appName, await fs.readFile(`./${appName}.md`, 'utf-8'), md5(appName), '/'))
-
-  if(cname) {
-    await fs.writeFile(path.join(process.cwd(), 'CNAME'), cname)
-  }
-  if(gaAdsTxt) {
-    await fs.writeFile(path.join(process.cwd(), 'ads.txt'), gaAdsTxt)
+  if (gaAdsTxt) {
+    await fs.writeFile(path.join(process.cwd(), "ads.txt"), gaAdsTxt);
   }
 
   // deploy
-  execSync('git add .')
-  execSync(`git commit . -m 'chore: deploy wiki'`)
-  execSync(`git push origin -u -f master:gh-pages`)
+  execSync("git add .");
+  execSync(`git commit . -m 'chore: deploy wiki'`);
+  execSync(`git push origin -u -f master:gh-pages`);
 }
 
-main().catch(console.log)
+main().catch(console.log);

@@ -14,6 +14,9 @@ inputs:
   cname:
     required: false
     description: 'cname'
+  ignoreCnameFile:
+    required: false
+    description: 'ignore create CNAME'
   gaId:
     required: false
     description: 'google analyse ga id'
