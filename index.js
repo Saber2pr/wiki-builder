@@ -68,6 +68,19 @@ async function main() {
   // 1. add __wiki
   // 2. add content
   const template = await fs.readFile("./release/index.html", "utf-8");
+
+  // replace all js basename
+  const releaseFiles = await fs.readdir('./release')
+  for (const releaseFile of releaseFiles) {
+    if (/\.js$/.test(releaseFile)) {
+      // replace basename
+      const content = await fs.readFile(`./release/${releaseFile}`, 'utf8')
+      if (/__\$basename\$__/.test(content)) {
+        await fs.writeFile(`./release/${releaseFile}`, content.replace('__$basename$__', basename), 'utf8')
+      }
+    }
+  }
+
   const wiki = await fs.readFile("./wiki", "utf-8");
 
   // render md5
@@ -290,8 +303,7 @@ async function main() {
       const displayTitle = params_title || appName;
       outHtml = outHtml.replace(
         "<title>saber2prの窝</title>",
-        `<title>${
-          title === appName ? displayTitle : `${title} - ${displayTitle}`
+        `<title>${title === appName ? displayTitle : `${title} - ${displayTitle}`
         }</title>`
       );
     }
@@ -360,7 +372,7 @@ async function main() {
   const postRootDir = path.join(process.cwd(), "posts");
   try {
     await fs.mkdir(postRootDir, { recursive: true });
-  } catch (error) {}
+  } catch (error) { }
 
   for (const file of files) {
     const dir = path.dirname(file.path);
