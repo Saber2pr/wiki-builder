@@ -75,8 +75,8 @@ async function main() {
     if (/\.js$/.test(releaseFile)) {
       // replace basename
       const content = await fs.readFile(`./release/${releaseFile}`, 'utf8')
-      if (/__\$basename\$__/.test(content)) {
-        await fs.writeFile(`./release/${releaseFile}`, content.replace('/__$basename$__', basename), 'utf8')
+      if (content && content.includes('__$basename$__')) {
+        await fs.writeFile(`./release/${releaseFile}`, content.replaceAll('/__$basename$__', basename), 'utf8')
       }
     }
   }
