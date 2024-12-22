@@ -243,6 +243,15 @@ async function main() {
         margin-right: 1rem;
       }
 
+      .ssr-wiki {
+        margin: 0 4.5rem;
+        display: flex;
+      }
+
+      .ssr-wiki-content {
+        width:70%;
+      }
+
       .ssr-wiki-menu {
         width: 30%;
         background-color: #f7f7f7;
@@ -252,6 +261,11 @@ async function main() {
         right:-1rem;
         top:40px;
         overflow-y:auto;
+      }
+
+      .ssr-content-main {
+        margin: 1rem;
+        padding: 1rem;
       }
 
       #root-pre {
@@ -266,6 +280,44 @@ async function main() {
       #root {
         position: relative;
         z-index:0;
+      }
+
+      @media screen and (max-width: 740px) {
+        .ssr-topheader {
+          height: 2rem;
+        }
+        .ssr-topheader-a {
+          line-height: 2rem;
+        }
+        .ssr-wiki {
+          flex-direction: column;
+          margin: 0;
+          padding: 0;
+        }
+
+        .ssr-wiki-content {
+          width: 100%;
+        }
+
+        .ssr-wiki-menu {
+          position: relative;
+          width: 100%;
+          right: 0;
+        }
+
+        .ssr-content-title {
+          font-size: 2rem;
+          margin-top: 4rem;
+          margin-left: 0.5rem;
+          margin-right: 0.5rem;
+        }
+
+        .ssr-content-main {
+          margin: 0.5rem;
+          padding: 0.5rem;
+          line-height: 1.5rem;
+          font-size: 14px;
+        }
       }
     </style>
     <script>
@@ -284,10 +336,10 @@ async function main() {
         '<div id="root"></div>',
         `<div id="root-pre"><div class="ssr-topheader">
     <a class="ssr-topheader-a" href="${basename}/">${appName}</a>
-    </div><div style="margin: 0 4.5rem;display:flex;">
-      <div style="width:70%;">
+    </div><div class="ssr-wiki">
+      <div class="ssr-wiki-content">
         <h1 class="ssr-content-title">${title}</h1>
-        <div style="margin:1rem;padding:1rem;">${converter.makeHtml(
+        <div class="ssr-content-main">${converter.makeHtml(
           content
         )}</div>
       </div>
