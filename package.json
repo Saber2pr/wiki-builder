@@ -1,6 +1,6 @@
 {
   "name": "wiki-builder",
-  "version": "0.0.74",
+  "version": "0.0.75",
   "private": true,
   "description": "powered by saber2pr.github.io",
   "scripts": {
