@@ -11,6 +11,7 @@ const {
   resolveMdLink,
   md5,
   createHtml404,
+  parseTitle,
 } = require("./renderWikiMenu");
 
 const converter = new showdown.Converter();
@@ -70,13 +71,17 @@ async function main() {
   const template = await fs.readFile("./release/index.html", "utf-8");
 
   // replace all js basename
-  const releaseFiles = await fs.readdir('./release')
+  const releaseFiles = await fs.readdir("./release");
   for (const releaseFile of releaseFiles) {
     if (/\.js$/.test(releaseFile)) {
       // replace basename
-      const content = await fs.readFile(`./release/${releaseFile}`, 'utf8')
-      if (content && content.includes('__$basename$__')) {
-        await fs.writeFile(`./release/${releaseFile}`, content.replaceAll('/__$basename$__', basename), 'utf8')
+      const content = await fs.readFile(`./release/${releaseFile}`, "utf8");
+      if (content && content.includes("__$basename$__")) {
+        await fs.writeFile(
+          `./release/${releaseFile}`,
+          content.replaceAll("/__$basename$__", basename),
+          "utf8"
+        );
       }
     }
   }
@@ -106,24 +111,6 @@ async function main() {
         .join("\n");
     }
     return wiki;
-  };
-
-  function addSpaceBeforeUpperCaseWords(str) {
-    // 将第一个字母大写，后面的字母小写
-    let result = str.replace(/([a-z])([A-Z])/g, "$1 $2"); // 在大写字母前加空格
-    result = result.charAt(0).toUpperCase() + result.slice(1).toLowerCase(); // 第一个字母大写，其他字母小写
-    return result;
-  }
-
-  const parseTitle = (title) => {
-    if (/^[a-zA-Z]+$/.test(title)) {
-      try {
-        return addSpaceBeforeUpperCaseWords(title);
-      } catch (error) {
-        return title;
-      }
-    }
-    return title;
   };
 
   const createHtml = (title, content, md5Id, fPath) => {
@@ -357,9 +344,7 @@ async function main() {
     </div><div class="ssr-wiki">
       <div class="ssr-wiki-content">
         <h1 class="ssr-content-title">${title}</h1>
-        <div class="ssr-content-main">${converter.makeHtml(
-          content
-        )}</div>
+        <div class="ssr-content-main">${converter.makeHtml(content)}</div>
       </div>
       <div class="ssr-wiki-menu">
         <div style="margin: 3rem 0 10rem">${wikiMenu}</div>
@@ -373,7 +358,10 @@ async function main() {
       const displayTitle = params_title || appName;
       outHtml = outHtml.replace(
         "<title>saber2prの窝</title>",
-        `<title>${title === appName ? displayTitle : `${parseTitle(title)} - ${displayTitle}`
+        `<title>${
+          title === appName
+            ? displayTitle
+            : `${parseTitle(title)} - ${displayTitle}`
         }</title>`
       );
     }
@@ -442,7 +430,7 @@ async function main() {
   const postRootDir = path.join(process.cwd(), "posts");
   try {
     await fs.mkdir(postRootDir, { recursive: true });
-  } catch (error) { }
+  } catch (error) {}
 
   for (const file of files) {
     const dir = path.dirname(file.path);
