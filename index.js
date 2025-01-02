@@ -30,6 +30,7 @@ async function main() {
   const i18nConfig = core.getInput("i18nConfig");
   const expandAllMenu = core.getInput("expandAllMenu");
   const ignoreCnameFile = core.getInput("ignoreCnameFile");
+  const buttomlinksUri = core.getInput("buttomlinksUri");
 
   // seo
   const params_title = core.getInput("title");
@@ -329,6 +330,7 @@ async function main() {
     window.__title = "${parseTitle(title)}"
     window.__backgroundImage = ""
     window.__basename = '${basename}'
+    window.__buttomlinksUri = '${buttomlinksUri}'
     window.__expandAllMenu = '${expandAllMenu || ""}'
     window.__adsSlotHtml = '${encodeURIComponent(gaAdsSlotHtml)}'
     window.__i18nConfig = ${i18nConfig || "null"}

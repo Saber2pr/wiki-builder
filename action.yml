@@ -47,6 +47,9 @@ inputs:
   description:
     required: false
     description: 'seo description'
+  buttomlinksUri:
+    required: false
+    description: 'bottom links'
 runs:
     using: 'node20'
     main: dist/index.js
