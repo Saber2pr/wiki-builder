@@ -370,7 +370,7 @@ async function main() {
 
     if (indexKeywords) {
       outHtml = outHtml.replace(
-        '<meta name="keywords" content="react,antd,typescript,javascript,css,html,前端学习,前端进阶,个人博客">',
+        '<meta name="keywords" content="量化交易,freqtrade,web3,react,antd,typescript,javascript,css,html,前端学习,前端进阶,个人博客">',
         indexKeywords
       );
     }
