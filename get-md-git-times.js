@@ -52,35 +52,30 @@ function convertPathToMd5Key(path) {
 
 function getLastCommitTime(filePath) {
   try {
-    // 获取 Git 仓库根目录
+    // 仓库根路径
     const gitRoot = execSync("git rev-parse --show-toplevel", {
       encoding: "utf8",
     }).trim();
 
-    // 拼接绝对路径 + 转换为相对路径
-    const absolutePath = path.resolve(gitRoot, filePath);
-    const relativePath = path.relative(gitRoot, absolutePath);
+    // 绝对路径 & 相对路径
+    const absPath = path.resolve(filePath);
+    const relPath = path.relative(gitRoot, absPath);
 
-    if (!fs.existsSync(absolutePath)) {
-      console.warn(`文件不存在: ${absolutePath}`);
-      return null;
-    }
+    // ⚠️ 在仓库根目录执行命令
+    const options = { cwd: gitRoot, encoding: "utf8" };
 
-    // 检查文件是否被 Git 跟踪
-    execSync(`git ls-files --error-unmatch "${relativePath}"`, {
-      cwd: gitRoot,
-      stdio: "ignore",
-    });
+    // 检查是否被跟踪
+    execSync(`git ls-files --error-unmatch "${relPath}"`, options);
 
-    // 注意：一定要用 --date=local 并在仓库根执行
+    // 获取最后提交时间（使用相对路径）
     const result = execSync(
-      `git log -1 --date=local --format="%cd" -- "${relativePath}"`,
-      { cwd: gitRoot, encoding: "utf8" }
+      `git log -1 --date=local --format="%cd" -- "${relPath}"`,
+      options
     ).trim();
 
     return result || null;
   } catch (error) {
-    console.warn(`无法获取文件 ${filePath} 的 Git 信息:`, error.message);
+    console.warn(`❌ 无法获取 ${filePath} 的提交时间: ${error.message}`);
     return null;
   }
 }
