@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
-const { execSync } = require('child_process');
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
 const crc = require("crc");
+const moment = require("moment");
 
 const md5 = (str) => crc.crc32(str);
 /**
@@ -15,16 +16,16 @@ const md5 = (str) => crc.crc32(str);
 function getAllMdFiles(dir, fileList = []) {
   const files = fs.readdirSync(dir);
 
-  files.forEach(file => {
+  files.forEach((file) => {
     const filePath = path.join(dir, file);
     const stat = fs.statSync(filePath);
 
     if (stat.isDirectory()) {
       // 跳过.git目录
-      if (file !== '.git') {
+      if (file !== ".git") {
         getAllMdFiles(filePath, fileList);
       }
-    } else if (path.extname(file) === '.md') {
+    } else if (path.extname(file) === ".md") {
       fileList.push(filePath);
     }
   });
@@ -59,9 +60,9 @@ function getLastCommitTime(filePath) {
     // 使用git log命令获取文件的最后一次提交时间
     const command = `git log -1 --format="%ci" -- "${filePath}"`;
     const result = execSync(command, {
-      encoding: 'utf8',
+      encoding: "utf8",
       cwd: process.cwd(),
-      stdio: ['pipe', 'pipe', 'pipe']
+      stdio: ["pipe", "pipe", "pipe"],
     }).trim();
 
     return result || null;
@@ -74,7 +75,7 @@ function getLastCommitTime(filePath) {
 /**
  * 主函数
  */
-function createMdGitTimesJson(targetDir, outputFile) {
+function createMdGitTimesJson(targetDir) {
   console.log(`正在扫描目录: ${targetDir}`);
 
   // 获取所有md文件
@@ -85,13 +86,15 @@ function createMdGitTimesJson(targetDir, outputFile) {
   const result = {};
   let processedCount = 0;
 
-  mdFiles.forEach(filePath => {
+  mdFiles.forEach((filePath) => {
     const relativePath = path.relative(targetDir, filePath);
     const commitTime = getLastCommitTime(filePath);
 
     // 将路径转换为MD5格式的key
     const md5Key = convertPathToMd5Key(relativePath);
-    result[md5Key] = commitTime;
+    result[md5Key] = moment(commitTime).isValid()
+      ? moment(commitTime).unix()
+      : null;
     processedCount++;
 
     if (processedCount % 10 === 0) {
@@ -99,22 +102,26 @@ function createMdGitTimesJson(targetDir, outputFile) {
     }
   });
 
-  // 保存结果到JSON文件
-  const outputPath = path.resolve(targetDir, outputFile);
-  fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf8');
+  // // 保存结果到JSON文件
+  // const outputPath = path.resolve(targetDir, outputFile);
+  // fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf8');
 
   console.log(`\n处理完成！`);
   console.log(`结果已保存到: ${outputPath}`);
   console.log(`共处理 ${mdFiles.length} 个文件`);
 
   // 显示统计信息
-  const validTimes = Object.values(result).filter(time => time !== null).length;
+  const validTimes = Object.values(result).filter(
+    (time) => time !== null
+  ).length;
   console.log(`其中 ${validTimes} 个文件有git提交记录`);
+
+  return result;
 }
 
 module.exports = {
   getAllMdFiles,
   convertPathToMd5Key,
   getLastCommitTime,
-  createMdGitTimesJson
+  createMdGitTimesJson,
 };

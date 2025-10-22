@@ -38,6 +38,13 @@ async function main() {
   const params_keywords = core.getInput("keywords");
   const params_description = core.getInput("description");
 
+  let timeMap = {};
+  try {
+    timeMap = createMdGitTimesJson(process.cwd());
+  } catch (error) {
+    console.log(error);
+  }
+
   // config
   execSync("git config user.name github-actions");
   execSync("git config user.email github-actions@github.com");
@@ -136,6 +143,7 @@ async function main() {
       md5Id,
       fPath
     );
+
     let outHtml = template
       .replaceAll(`/__$basename$__`, basename)
       .replace(
@@ -338,6 +346,7 @@ async function main() {
     window.__expandDirs = ${JSON.stringify(expandDirs)}
     window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
+    window.__updateTime = "${timeMap[md5Id] || ""}"
     </script>`
       )
       .replace(
@@ -361,9 +370,10 @@ async function main() {
       const displayTitle = params_title || appName;
       outHtml = outHtml.replace(
         "<title>saber2prの窝</title>",
-        `<title>${title === appName
-          ? displayTitle
-          : `${parseTitle(title)} - ${displayTitle}`
+        `<title>${
+          title === appName
+            ? displayTitle
+            : `${parseTitle(title)} - ${displayTitle}`
         }</title>`
       );
     }
@@ -432,7 +442,7 @@ async function main() {
   const postRootDir = path.join(process.cwd(), "posts");
   try {
     await fs.mkdir(postRootDir, { recursive: true });
-  } catch (error) { }
+  } catch (error) {}
 
   for (const file of files) {
     const dir = path.dirname(file.path);
@@ -491,12 +501,6 @@ async function main() {
 
   if (gaAdsTxt) {
     await fs.writeFile(path.join(process.cwd(), "ads.txt"), gaAdsTxt);
-  }
-
-  try {
-    createMdGitTimesJson(process.cwd(), "md-git-times.json");
-  } catch (error) {
-    console.error(error);
   }
 
   // deploy
