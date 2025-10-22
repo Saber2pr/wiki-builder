@@ -61,7 +61,7 @@ function getLastCommitTime(filePath) {
       encoding: "utf8",
     }).trim();
     const absolutePath = path.resolve(gitRoot, filePath);
-    console.log("gitRoot", gitRoot, absolutePath);
+    console.log("gitRoot", gitRoot, absolutePath, fs.existsSync(absolutePath));
 
     // 检查文件是否被 Git 跟踪
     execSync(`git ls-files --error-unmatch "${absolutePath}"`, {
@@ -86,6 +86,14 @@ function getLastCommitTime(filePath) {
  * 主函数
  */
 function createMdGitTimesJson(targetDir) {
+  // 获取最后一次提交时间
+  const command = `git log -n 10`;
+  const logResult = execSync(command, {
+    encoding: "utf8",
+    stdio: ["pipe", "pipe", "pipe"],
+  });
+  console.log("git log >>", logResult);
+
   console.log(`正在扫描目录: ${targetDir}`);
 
   // 获取所有md文件
