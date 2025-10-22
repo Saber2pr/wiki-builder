@@ -4,7 +4,8 @@
   "private": true,
   "description": "powered by saber2pr.github.io",
   "scripts": {
-    "package": "ncc build index.js -o dist"
+    "package": "ncc build index.js -o dist",
+    "publish": "yarn package && sa _u && sa release && git push --follow-tags"
   },
   "repository": {
     "type": "git",
