@@ -61,6 +61,7 @@ function getLastCommitTime(filePath) {
       encoding: "utf8",
     }).trim();
     const absolutePath = path.resolve(gitRoot, filePath);
+    console.log("gitRoot", gitRoot, absolutePath);
 
     // 检查文件是否被 Git 跟踪
     execSync(`git ls-files --error-unmatch "${absolutePath}"`, {
