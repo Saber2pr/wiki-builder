@@ -57,17 +57,26 @@ function convertPathToMd5Key(path) {
  */
 function getLastCommitTime(filePath) {
   try {
-    // 使用git log命令获取文件的最后一次提交时间
-    const command = `git log -1 --format="%ci" -- "${filePath}"`;
+    const gitRoot = execSync("git rev-parse --show-toplevel", {
+      encoding: "utf8",
+    }).trim();
+    const absolutePath = path.resolve(gitRoot, filePath);
+
+    // 检查文件是否被 Git 跟踪
+    execSync(`git ls-files --error-unmatch "${absolutePath}"`, {
+      stdio: "ignore",
+    });
+
+    // 获取最后一次提交时间
+    const command = `git log -1 --format="%ci" -- "${absolutePath}"`;
     const result = execSync(command, {
       encoding: "utf8",
-      cwd: process.cwd(),
       stdio: ["pipe", "pipe", "pipe"],
     }).trim();
 
     return result || null;
   } catch (error) {
-    console.warn(`无法获取文件 ${filePath} 的git信息:`, error.message);
+    console.warn(`无法获取文件 ${filePath} 的 Git 信息:`, error.message);
     return null;
   }
 }
