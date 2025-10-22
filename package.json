@@ -5,7 +5,7 @@
   "description": "powered by saber2pr.github.io",
   "scripts": {
     "package": "ncc build index.js -o dist",
-    "publish": "yarn package && sa _u && sa release && git push --follow-tags"
+    "publish": "yarn package && sa _u && sa release && git push --follow-tags && open https://github.com/Saber2pr/wiki-builder/releases/new"
   },
   "repository": {
     "type": "git",
