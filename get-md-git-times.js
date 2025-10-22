@@ -52,32 +52,30 @@ function convertPathToMd5Key(path) {
 
 function getLastCommitTime(filePath) {
   try {
+    // 获取 Git 仓库根目录
     const gitRoot = execSync("git rev-parse --show-toplevel", {
       encoding: "utf8",
     }).trim();
+
+    // 拼接绝对路径 + 转换为相对路径
     const absolutePath = path.resolve(gitRoot, filePath);
+    const relativePath = path.relative(gitRoot, absolutePath);
 
     if (!fs.existsSync(absolutePath)) {
       console.warn(`文件不存在: ${absolutePath}`);
       return null;
     }
 
-    // 转换为相对路径（相对于仓库根目录）
-    const relativePath = path.relative(gitRoot, absolutePath);
-
-    // 检查是否被 Git 跟踪
+    // 检查文件是否被 Git 跟踪
     execSync(`git ls-files --error-unmatch "${relativePath}"`, {
       cwd: gitRoot,
       stdio: "ignore",
     });
 
-    // 获取该文件的最后提交时间（本地时间）
+    // 注意：一定要用 --date=local 并在仓库根执行
     const result = execSync(
       `git log -1 --date=local --format="%cd" -- "${relativePath}"`,
-      {
-        cwd: gitRoot,
-        encoding: "utf8",
-      }
+      { cwd: gitRoot, encoding: "utf8" }
     ).trim();
 
     return result || null;
@@ -97,7 +95,7 @@ function createMdGitTimesJson(targetDir) {
     encoding: "utf8",
     stdio: ["pipe", "pipe", "pipe"],
   });
-  console.log("git log >>", logResult);
+  console.log("git log >", logResult);
 
   console.log(`正在扫描目录: ${targetDir}`);
 
