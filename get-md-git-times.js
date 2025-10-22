@@ -50,30 +50,35 @@ function convertPathToMd5Key(path) {
     .join("/");
 }
 
-/**
- * 获取文件的最后一次git提交时间
- * @param {string} filePath 文件路径
- * @returns {string|null} 提交时间字符串或null
- */
 function getLastCommitTime(filePath) {
   try {
     const gitRoot = execSync("git rev-parse --show-toplevel", {
       encoding: "utf8",
     }).trim();
     const absolutePath = path.resolve(gitRoot, filePath);
-    console.log("gitRoot", gitRoot, absolutePath, fs.existsSync(absolutePath));
 
-    // 检查文件是否被 Git 跟踪
-    execSync(`git ls-files --error-unmatch "${absolutePath}"`, {
+    if (!fs.existsSync(absolutePath)) {
+      console.warn(`文件不存在: ${absolutePath}`);
+      return null;
+    }
+
+    // 转换为相对路径（相对于仓库根目录）
+    const relativePath = path.relative(gitRoot, absolutePath);
+
+    // 检查是否被 Git 跟踪
+    execSync(`git ls-files --error-unmatch "${relativePath}"`, {
+      cwd: gitRoot,
       stdio: "ignore",
     });
 
-    // 获取最后一次提交时间
-    const command = `git log -1 --format="%ci" -- "${absolutePath}"`;
-    const result = execSync(command, {
-      encoding: "utf8",
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
+    // 获取该文件的最后提交时间（本地时间）
+    const result = execSync(
+      `git log -1 --date=local --format="%cd" -- "${relativePath}"`,
+      {
+        cwd: gitRoot,
+        encoding: "utf8",
+      }
+    ).trim();
 
     return result || null;
   } catch (error) {
