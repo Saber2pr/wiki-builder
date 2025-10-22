@@ -90,7 +90,6 @@ function createMdGitTimesJson(targetDir) {
     encoding: "utf8",
     stdio: ["pipe", "pipe", "pipe"],
   });
-  console.log("git log >", logResult);
 
   console.log(`正在扫描目录: ${targetDir}`);
 
@@ -105,7 +104,6 @@ function createMdGitTimesJson(targetDir) {
   mdFiles.forEach((filePath) => {
     const relativePath = path.relative(targetDir, filePath);
     const commitTime = getLastCommitTime(filePath);
-    console.log("commitTime:", commitTime);
 
     // 将路径转换为MD5格式的key
     const md5Key = convertPathToMd5Key(relativePath);
