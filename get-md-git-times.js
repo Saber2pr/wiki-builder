@@ -102,12 +102,7 @@ function createMdGitTimesJson(targetDir) {
     }
   });
 
-  // // 保存结果到JSON文件
-  // const outputPath = path.resolve(targetDir, outputFile);
-  // fs.writeFileSync(outputPath, JSON.stringify(result, null, 2), 'utf8');
-
   console.log(`\n处理完成！`);
-  console.log(`结果已保存到: ${outputPath}`);
   console.log(`共处理 ${mdFiles.length} 个文件`);
 
   // 显示统计信息
