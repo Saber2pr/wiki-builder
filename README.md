@@ -16,7 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.1
-      - uses: Saber2pr/wiki-builder@v0.0.69
+        with:
+          fetch-depth: 0 # fetch full history for docs update time show.
+      - uses: Saber2pr/wiki-builder@v0.0.90
 ```
 
 1. live demo: [Saber2pr's Blog](https://saber2pr.top/)
@@ -32,7 +34,9 @@ When CI is built, it will be compiled into HTML static files, which is SEO frien
 
 ```yml
 - uses: actions/checkout@v4.1.1
-- uses: Saber2pr/wiki-builder@v0.0.69
+  with:
+    fetch-depth: 0
+- uses: Saber2pr/wiki-builder@v0.0.90
   with:
     cname: saber2pr.top # optional, your website cname
     gaId: G-XXX # optional, your google analytics gid 
