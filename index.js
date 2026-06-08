@@ -19,6 +19,8 @@ const converter = new showdown.Converter();
 
 const getMdName = (mdFileName) => (mdFileName ? mdFileName.split(".")[0] : "");
 const trimSlash = (value = "") => value.replace(/\/+$/, "");
+const normalizeTextForLlms = (value = "") =>
+  String(value).replace(/\s+/g, " ").trim();
 
 async function main() {
   const basename = core.getInput("basename") || "";
@@ -503,10 +505,18 @@ async function main() {
   const siteBase = `${trimSlash(cname ? `https://${cname}` : "")}${trimSlash(
     basename
   )}`;
+  const seoTitle = normalizeTextForLlms(params_title || appName);
+  const seoKeywords = normalizeTextForLlms(params_keywords || "");
+  const seoDescription = normalizeTextForLlms(params_description || "");
   const llmsTxt = [
     `# ${appName}`,
     "",
     "> Markdown index for LLM consumption.",
+    "",
+    "## SEO",
+    `- title: ${seoTitle}`,
+    ...(seoKeywords ? [`- keywords: ${seoKeywords}`] : []),
+    ...(seoDescription ? [`- description: ${seoDescription}`] : []),
     "",
     "## Markdown Files",
     ...mdLinks.map(
