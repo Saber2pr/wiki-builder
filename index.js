@@ -18,6 +18,7 @@ const { createMdGitTimesJson } = require("./get-md-git-times");
 const converter = new showdown.Converter();
 
 const getMdName = (mdFileName) => (mdFileName ? mdFileName.split(".")[0] : "");
+const trimSlash = (value = "") => value.replace(/\/+$/, "");
 
 async function main() {
   const basename = core.getInput("basename") || "";
@@ -433,6 +434,7 @@ async function main() {
   };
 
   const urls = [];
+  const mdLinks = [];
   const files = await tp.walkFile(
     "./blog",
     (entry) => /\.md$/.test(entry.path),
@@ -461,9 +463,17 @@ async function main() {
       path.join(postDir, "index.html"),
       createHtml(title, file.content, md5Id, fPath)
     );
+    await fs.writeFile(
+      path.join(postRootDir, `${md5Id}.md`),
+      resolveMdLink(file.content, basename)
+    );
 
     const pidx = postDir.indexOf("posts");
     urls.push("/" + postDir.slice(pidx) + "/");
+    mdLinks.push({
+      title: parseTitle(title),
+      path: `/${postRootDir.slice(pidx)}/${md5Id}.md`,
+    });
   }
 
   if (cname) {
@@ -490,6 +500,22 @@ async function main() {
       "/"
     )
   );
+  const siteBase = `${trimSlash(cname ? `https://${cname}` : "")}${trimSlash(
+    basename
+  )}`;
+  const llmsTxt = [
+    `# ${appName}`,
+    "",
+    "> Markdown index for LLM consumption.",
+    "",
+    "## Markdown Files",
+    ...mdLinks.map(
+      (item) =>
+        `- [${item.title}](${siteBase ? `${siteBase}${item.path}` : item.path})`
+    ),
+    "",
+  ].join("\n");
+  await fs.writeFile(path.join(process.cwd(), "llms.txt"), llmsTxt);
 
   if (ignoreCnameFile) {
     // noop
