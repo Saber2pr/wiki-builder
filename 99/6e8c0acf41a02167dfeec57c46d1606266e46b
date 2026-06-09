@@ -1,0 +1,24 @@
+index.js
+  s_05f7bf0100220a::t_e49a0ac6fa9cde 201
+dist/index.js
+  s_05f7bf0100220a::t_f22f8142dd2a48 229732,229736,229739-229741,229748-229755,229762-229765,229780,229784,232922
+renderWikiMenu.js
+  s_05f7bf0100220a::t_8bdea60383648e 85,89
+  s_05f7bf0100220a::t_950f1dc1c5fcde 37,41,44-46,53-60,67-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "996e8c0acf41a02167dfeec57c46d1606266e46b",
+  "prompts": {},
+  "sessions": {
+    "s_05f7bf0100220a": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "e29bc8c5-04be-4d0f-8b6b-049c976a7328",
+        "model": "default"
+      },
+      "human_author": "muhai <muhai.li@tuya.com>"
+    }
+  }
+}
