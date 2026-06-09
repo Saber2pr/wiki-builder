@@ -40,7 +40,8 @@ const renderMenu = (basename, root, md5Id, fPath) => {
   const [nodeName, nodeMd5Id] = root.name.split(":");
 
   if (isLeaf) {
-    return `<a href="${basename}/posts/${nodeMd5Id}/" class="ssr-a ${
+    const nodeNav = root.name.split(":")[2] || "posts";
+    return `<a href="${basename}/${nodeNav}/${nodeMd5Id}/" class="ssr-a ${
       md5Id === nodeMd5Id ? "ssr-a-active" : ""
     }">${parseTitle(nodeName)}</a>`;
   }
@@ -79,7 +80,12 @@ const renderWikiMenu = (basename, wiki, md5Id, fPath) => {
   };
 };
 
-const resolveMdLink = (content, basename) => {
+const getNavForBlogPath = (navByPath, relPath = "") => {
+  const normalized = relPath.replace(/^\.\//, "").replace(/\.md$/, "");
+  return navByPath[normalized] || navByPath[`${normalized}.md`] || "posts";
+};
+
+const resolveMdLink = (content, basename, navByPath = {}) => {
   if (typeof content === "string") {
     return content
       .split("\n")
@@ -89,10 +95,10 @@ const resolveMdLink = (content, basename) => {
           /^\[/.test(line) &&
           /\)$/.test(line)
         ) {
-          return line.replace(
-            /\(\/blog\/([\s\S]*)?\)/,
-            (_, str) => `(${basename}/posts/${getPathMd5Id(str)}/)`
-          );
+          return line.replace(/\(\/blog\/([\s\S]*)?\)/, (_, str) => {
+            const nav = getNavForBlogPath(navByPath, str);
+            return `(${basename}/${nav}/${getPathMd5Id(str)}/)`;
+          });
         }
         return line;
       })
@@ -125,6 +131,7 @@ The page you visited is moved or deleted.
 module.exports = {
   renderWikiMenu,
   getPathMd5Id,
+  getNavForBlogPath,
   resolveMdLink,
   md5,
   createHtml404,

@@ -14,6 +14,7 @@ const {
   parseTitle,
 } = require("./renderWikiMenu");
 const { createMdGitTimesJson } = require("./get-md-git-times");
+const { parseMdMeta, sanitizeNav, escapeHtml } = require("./parseMdMeta");
 
 const converter = new showdown.Converter();
 
@@ -21,6 +22,14 @@ const getMdName = (mdFileName) => (mdFileName ? mdFileName.split(".")[0] : "");
 const trimSlash = (value = "") => value.replace(/\/+$/, "");
 const normalizeTextForLlms = (value = "") =>
   String(value).replace(/\s+/g, " ").trim();
+const getBlogRelPath = (filePath = "") => {
+  const idx = filePath.indexOf("/blog/");
+  const relPath =
+    idx !== -1 ? filePath.slice(idx + "/blog/".length) : path.basename(filePath);
+  return relPath.replace(/^\.\//, "");
+};
+const buildNavList = (navSet) =>
+  [...navSet].filter((item) => item && item !== "posts").sort();
 
 async function main() {
   const basename = core.getInput("basename") || "";
@@ -59,7 +68,7 @@ async function main() {
 
   // create blog, collect md files
   execSync(
-    'mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} '
+    'mkdir blog && ls -d */ | grep -v "blog" | xargs -I {} cp -r ./{} ./blog/{} ',
   );
   await fs.copy(`./${appName}.md`, `./blog/${appName}.md`);
   execSync('find ./blog -type f -not -name "*.md" | xargs -I {} rm -rf {}');
@@ -67,12 +76,12 @@ async function main() {
 
   // render menu
   execSync(
-    `cd blog && find . | sed -e "s/[^-][^/]*\\//  /g" -e "s/\.md//" | awk '{print substr($0, 3)}'  > ../wiki`
+    `cd blog && find . | sed -e "s/[^-][^/]*\\//  /g" -e "s/\.md//" | awk '{print substr($0, 3)}'  > ../wiki`,
   );
 
   // download wiki app
   execSync(
-    `curl "https://raw.githubusercontent.com/Saber2pr/wiki/master/build/wiki-release.tar.gz" > ./wiki-release.tar.gz`
+    `curl "https://raw.githubusercontent.com/Saber2pr/wiki/master/build/wiki-release.tar.gz" > ./wiki-release.tar.gz`,
   );
   execSync(`tar -xvf ./wiki-release.tar.gz`);
   execSync("touch .nojekyll");
@@ -92,13 +101,38 @@ async function main() {
         await fs.writeFile(
           `./release/${releaseFile}`,
           content.replaceAll("/__$basename$__", basename),
-          "utf8"
+          "utf8",
         );
       }
     }
   }
 
   const wiki = await fs.readFile("./wiki", "utf-8");
+
+  const files = await tp.walkFile(
+    "./blog",
+    (entry) => /\.md$/.test(entry.path),
+    { withContent: true },
+  );
+
+  const navSet = new Set(["posts"]);
+  const navByPath = {};
+  const navFirst = {};
+
+  for (const file of files) {
+    const { meta, body } = parseMdMeta(file.content);
+    file.meta = meta;
+    file.content = body;
+    file.nav = sanitizeNav(meta.nav) || "posts";
+    if (file.nav !== "posts") {
+      navSet.add(file.nav);
+    }
+    const relPath = getBlogRelPath(file.path);
+    navByPath[relPath] = file.nav;
+    navByPath[relPath.replace(/\.md$/, "")] = file.nav;
+  }
+
+  const navList = buildNavList(navSet);
 
   // render md5
   /**
@@ -115,7 +149,9 @@ async function main() {
           if (text) {
             const file = files.find((item) => getMdName(item.name) === text);
             if (file) {
-              return `${line}:${getPathMd5Id(file.path)}`;
+              const navSuffix =
+                file.nav && file.nav !== "posts" ? `:${file.nav}` : "";
+              return `${line}:${getPathMd5Id(file.path)}${navSuffix}`;
             }
             return `${line}`;
           }
@@ -125,27 +161,50 @@ async function main() {
     return wiki;
   };
 
-  const createHtml = (title, content, md5Id, fPath) => {
+  const createHtml = (
+    title,
+    content,
+    md5Id,
+    fPath,
+    pageMeta = {},
+    pageNav = "posts",
+  ) => {
     const isIndex = fPath === "/";
+    const seoTitle = pageMeta.title || title;
+    const seoKeywords = pageMeta.keywords || "";
+    const seoDescription = pageMeta.description || "";
 
     const indexTitle =
-      params_title && isIndex ? `<title>${params_title}</title>` : "";
-    const indexKeywords = params_keywords
-      ? `<meta name="keywords" content="${params_keywords}">`
-      : "";
+      (pageMeta.title || (params_title && isIndex)) && isIndex
+        ? `<title>${escapeHtml(pageMeta.title || params_title)}</title>`
+        : "";
+    const indexKeywords =
+      pageMeta.keywords || params_keywords
+        ? `<meta name="keywords" content="${escapeHtml(
+            pageMeta.keywords || params_keywords,
+          )}">`
+        : "";
     const indexDesc =
-      params_description && isIndex
-        ? `<meta name="description" content="${params_description}">`
+      pageMeta.description || (params_description && isIndex)
+        ? `<meta name="description" content="${escapeHtml(
+            pageMeta.description || params_description,
+          )}">`
         : "";
 
-    content = resolveMdLink(content, basename);
+    content = resolveMdLink(content, basename, navByPath);
     const wikiMd5 = renderWikiMd5(wiki, files);
     const { menu: wikiMenu, expandDirs } = renderWikiMenu(
       basename,
       wikiMd5,
       md5Id,
-      fPath
+      fPath,
     );
+    const navHeaderLinks = navList
+      .map(
+        (nav) =>
+          `<a class="ssr-topheader-a" href="${basename}/${nav}/${navFirst[nav] || ""}/">${nav}</a>`,
+      )
+      .join("\n    ");
 
     let outHtml = template
       .replaceAll(`/__$basename$__`, basename)
@@ -339,7 +398,10 @@ async function main() {
       }
     </style>
     <script>
-    window.__title = "${parseTitle(title)}"
+    window.__navlist = ${JSON.stringify(navList)}
+    window.__navFirst = ${JSON.stringify(navFirst)}
+    window.__nav = "${pageNav}"
+    window.__title = "${parseTitle(seoTitle)}"
     window.__backgroundImage = ""
     window.__basename = '${basename}'
     window.__buttomlinksUri = '${buttomlinksUri}'
@@ -350,55 +412,74 @@ async function main() {
     window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
     window.__updateTime = "${timeMap[md5Id] || ""}"
-    </script>`
+    </script>`,
       )
       .replace(
         '<div id="root"></div>',
         `<div id="root-pre"><div class="ssr-topheader">
     <a class="ssr-topheader-a" href="${basename}/">${appName}</a>
+    ${navHeaderLinks}
     </div><div class="ssr-wiki">
       <div class="ssr-wiki-content">
-        <h1 class="ssr-content-title">${title}</h1>
+        <h1 class="ssr-content-title">${escapeHtml(seoTitle)}</h1>
         <div class="ssr-content-main">${converter.makeHtml(content)}</div>
       </div>
       <div class="ssr-wiki-menu">
         <div style="margin: 3rem 0 10rem">${wikiMenu}</div>
       </div>
-    </div></div><div id="root"></div>`
+    </div></div><div id="root"></div>`,
       );
 
     if (indexTitle) {
       outHtml = outHtml.replace("<title>saber2prの窝</title>", indexTitle);
     } else {
       const displayTitle = params_title || appName;
+      const pageTitle = pageMeta.title || title;
       outHtml = outHtml.replace(
         "<title>saber2prの窝</title>",
         `<title>${
-          title === appName
-            ? displayTitle
-            : `${parseTitle(title)} - ${displayTitle}`
-        }</title>`
+          pageMeta.title
+            ? escapeHtml(pageMeta.title)
+            : pageTitle === appName
+              ? displayTitle
+              : `${parseTitle(pageTitle)} - ${displayTitle}`
+        }</title>`,
       );
     }
 
     if (indexKeywords) {
       outHtml = outHtml.replace(
         '<meta name="keywords" content="量化交易,freqtrade,web3,react,antd,typescript,javascript,css,html,前端学习,前端进阶,个人博客">',
-        indexKeywords
+        indexKeywords,
+      );
+    } else if (pageMeta.keywords) {
+      outHtml = outHtml.replace(
+        '<meta name="keywords" content="量化交易,freqtrade,web3,react,antd,typescript,javascript,css,html,前端学习,前端进阶,个人博客">',
+        `<meta name="keywords" content="${escapeHtml(pageMeta.keywords)}">`,
+      );
+    } else {
+      outHtml = outHtml.replace(
+        '<meta name="keywords" content="量化交易,freqtrade,web3,react,antd,typescript,javascript,css,html,前端学习,前端进阶,个人博客">',
+        "",
       );
     }
 
     if (indexDesc) {
       outHtml = outHtml.replace(
         '<meta name="description" content="长期更新前端技术文章,分享前端技术经验">',
-        indexDesc
+        indexDesc,
+      );
+    } else if (pageMeta.description) {
+      outHtml = outHtml.replace(
+        '<meta name="description" content="长期更新前端技术文章,分享前端技术经验">',
+        `<meta name="description" content="${escapeHtml(pageMeta.description)}">`,
       );
     } else {
       outHtml = outHtml.replace(
         '<meta name="description" content="长期更新前端技术文章,分享前端技术经验">',
         `<meta name="description" content="${content
           .replace(/"/g, " ")
-          .slice(0, 113)}…">`
+          .slice(0, 113)}…">`,
       );
     }
 
@@ -413,14 +494,14 @@ async function main() {
         gtag('js', new Date());
       
         gtag('config', '${gaId}');
-      </script>`
+      </script>`,
       );
     }
     if (gaAdId) {
       outHtml = outHtml.replace(
         "<head>",
         `<head>
-      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${gaAdId}" crossorigin="anonymous"></script>`
+      <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${gaAdId}" crossorigin="anonymous"></script>`,
       );
     }
 
@@ -428,7 +509,7 @@ async function main() {
       outHtml = outHtml.replace(
         "<head>",
         `<head>
-      <link rel="icon" href="${iconUrl}" type="image/x-icon" />`
+      <link rel="icon" href="${iconUrl}" type="image/x-icon" />`,
       );
     }
 
@@ -437,16 +518,6 @@ async function main() {
 
   const urls = [];
   const mdLinks = [];
-  const files = await tp.walkFile(
-    "./blog",
-    (entry) => /\.md$/.test(entry.path),
-    { withContent: true }
-  );
-
-  const postRootDir = path.join(process.cwd(), "posts");
-  try {
-    await fs.mkdir(postRootDir, { recursive: true });
-  } catch (error) {}
 
   for (const file of files) {
     const dir = path.dirname(file.path);
@@ -458,52 +529,72 @@ async function main() {
     const fPath = file.path.slice(idx);
 
     const md5Id = getPathMd5Id(file.path);
-    const postDir = path.join(postRootDir, `${md5Id}`);
+    const navRootDir = path.join(process.cwd(), file.nav);
+    const postDir = path.join(navRootDir, `${md5Id}`);
     await fs.mkdir(postDir, { recursive: true });
+
+    if (!navFirst[file.nav]) {
+      navFirst[file.nav] = md5Id;
+    }
+
+    const pageTitle = file.meta.title || title;
+    const pageContent = resolveMdLink(file.content, basename, navByPath);
 
     await fs.writeFile(
       path.join(postDir, "index.html"),
-      createHtml(title, file.content, md5Id, fPath)
+      createHtml(
+        pageTitle,
+        pageContent,
+        md5Id,
+        fPath,
+        file.meta,
+        file.nav,
+      ),
     );
     await fs.writeFile(
-      path.join(postRootDir, `${md5Id}.md`),
-      resolveMdLink(file.content, basename)
+      path.join(navRootDir, `${md5Id}.md`),
+      pageContent,
     );
 
-    const pidx = postDir.indexOf("posts");
-    urls.push("/" + postDir.slice(pidx) + "/");
+    const navIdx = postDir.indexOf(file.nav);
+    urls.push("/" + postDir.slice(navIdx) + "/");
     mdLinks.push({
-      title: parseTitle(title),
-      path: `/${postRootDir.slice(pidx)}/${md5Id}.md`,
+      title: parseTitle(pageTitle),
+      path: `/${file.nav}/${md5Id}.md`,
     });
   }
 
   if (cname) {
     await fs.writeFile(
       path.join(process.cwd(), "robots.txt"),
-      `Sitemap: https://${cname}/sitemap.xml`
+      `Sitemap: https://${cname}/sitemap.xml`,
     );
     await fs.writeFile(
       path.join(process.cwd(), "sitemap.xml"),
-      createSitemap(cname, basename, urls)
+      createSitemap(cname, basename, urls),
     );
   }
 
+  const homeRaw = await fs.readFile(`./${appName}.md`, "utf-8");
+  const { meta: homeMeta, body: homeBody } = parseMdMeta(homeRaw);
+
   await fs.writeFile(
     path.join(process.cwd(), "404.html"),
-    createHtml(`404`, createHtml404(basename), md5("404"), "/404")
+    createHtml(`404`, createHtml404(basename), md5("404"), "/404", {}, "posts"),
   );
   await fs.writeFile(
     path.join(process.cwd(), "index.html"),
     createHtml(
-      appName,
-      await fs.readFile(`./${appName}.md`, "utf-8"),
+      homeMeta.title || appName,
+      resolveMdLink(homeBody, basename, navByPath),
       md5(appName),
-      "/"
-    )
+      "/",
+      homeMeta,
+      "posts",
+    ),
   );
   const siteBase = `${trimSlash(cname ? `https://${cname}` : "")}${trimSlash(
-    basename
+    basename,
   )}`;
   const seoTitle = normalizeTextForLlms(params_title || appName);
   const seoKeywords = normalizeTextForLlms(params_keywords || "");
@@ -521,7 +612,7 @@ async function main() {
     "## Markdown Files",
     ...mdLinks.map(
       (item) =>
-        `- [${item.title}](${siteBase ? `${siteBase}${item.path}` : item.path})`
+        `- [${item.title}](${siteBase ? `${siteBase}${item.path}` : item.path})`,
     ),
     "",
   ].join("\n");
