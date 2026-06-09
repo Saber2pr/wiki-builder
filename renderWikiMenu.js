@@ -34,27 +34,38 @@ const parseTitle = (title) => {
 
 const getArray = (arr) => (Array.isArray(arr) ? arr : []);
 
-const renderMenu = (basename, root, md5Id, fPath) => {
+const renderMenu = (basename, root, md5Id, fPath, currentNav = "posts") => {
   let isLeaf = !root.children;
 
   const [nodeName, nodeMd5Id] = root.name.split(":");
+  const nodeNav = root.name.split(":")[2] || "posts";
 
   if (isLeaf) {
-    const nodeNav = root.name.split(":")[2] || "posts";
+    if (nodeNav !== currentNav) {
+      return "";
+    }
     return `<a href="${basename}/${nodeNav}/${nodeMd5Id}/" class="ssr-a ${
       md5Id === nodeMd5Id ? "ssr-a-active" : ""
     }">${parseTitle(nodeName)}</a>`;
   }
 
   const inner = getArray(root.children)
-    .map(
-      (item) =>
-        `<li class="ssr-li">${renderMenu(basename, item, md5Id, fPath)}</li>`
-    )
+    .map((item) => {
+      const rendered = renderMenu(basename, item, md5Id, fPath, currentNav);
+      if (!rendered) {
+        return "";
+      }
+      return `<li class="ssr-li">${rendered}</li>`;
+    })
+    .filter(Boolean)
     .join("\n");
 
   if (root.name === "root") {
     return `<ul class="ssr-ul">${inner}</ul>`;
+  }
+
+  if (!inner) {
+    return "";
   }
 
   const isExpand = fPath.startsWith(root.path);
@@ -71,11 +82,11 @@ const renderMenu = (basename, root, md5Id, fPath) => {
 
 let expandDirs = [];
 
-const renderWikiMenu = (basename, wiki, md5Id, fPath) => {
+const renderWikiMenu = (basename, wiki, md5Id, fPath, currentNav = "posts") => {
   const tree = parseTree(wiki);
   expandDirs = [];
   return {
-    menu: renderMenu(basename, tree, md5Id, fPath),
+    menu: renderMenu(basename, tree, md5Id, fPath, currentNav),
     expandDirs,
   };
 };

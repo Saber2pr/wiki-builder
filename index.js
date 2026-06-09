@@ -198,6 +198,7 @@ async function main() {
       wikiMd5,
       md5Id,
       fPath,
+      pageNav,
     );
     const navHeaderLinks = navList
       .map(
