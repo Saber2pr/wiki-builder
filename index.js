@@ -44,6 +44,7 @@ async function main() {
   const expandAllMenu = core.getInput("expandAllMenu");
   const ignoreCnameFile = core.getInput("ignoreCnameFile");
   const buttomlinksUri = core.getInput("buttomlinksUri");
+  const copyrightName = core.getInput("copyrightName");
 
   // seo
   const params_title = core.getInput("title");
@@ -413,6 +414,7 @@ async function main() {
     window.__wiki = \`${wikiMd5}\`
     window.__blog = \`${encodeURIComponent(content)}\`
     window.__updateTime = "${timeMap[md5Id] || ""}"
+    window.__copyrightName = "${copyrightName || ""}"
     </script>`,
       )
       .replace(
